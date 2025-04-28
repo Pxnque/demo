@@ -5,12 +5,28 @@ import java.util.HashMap;
 }
 
 @members {
-    // Tabla de símbolos para variables declaradas
-    private HashMap<String, String> symbolTable = new HashMap<>();
+    class VariableInfo {
+        String type;
+        boolean initialized;
+
+        VariableInfo(String type, boolean initialized) {
+            this.type = type;
+            this.initialized = initialized;
+        }
+    }
+
+    private HashMap<String, VariableInfo> symbolTable = new HashMap<>();
     
     private void checkVariableExists(String varName, Token token) {
         if (!symbolTable.containsKey(varName)) {
             throw new RuntimeException("Variable no declarada '" + varName + "' en línea " + token.getLine());
+        }
+    }
+    
+    private void checkVariableInitialized(String varName, Token token) {
+        VariableInfo info = symbolTable.get(varName);
+        if (info != null && !info.initialized) {
+            throw new RuntimeException("Variable no inicializada '" + varName + "' en línea " + token.getLine());
         }
     }
     
@@ -30,27 +46,42 @@ program
     ;
 
 instruccion:
-    ID OP_ASIGN (expr | condicional)
+    ID OP_ASIGN (expr | condicional) {
+        String varName = $ID.text;
+        checkVariableExists(varName, $ID);
+        VariableInfo info = symbolTable.get(varName);
+        info.initialized = true;
+    }
     | expr
     | condicional
     | declaracion
     | ifdecla
     | fordecla
     | incdec
+    | print
+    ;
+
+print
+    : 
     ;
 
 declaracion:
-    tipo = (INT | FLOAT | BOOL | STRING | CHAR) ID (OP_ASIGN expr)* {
-        // Registrar variable en tabla de símbolos
-        if (symbolTable.containsKey($ID.text)) {
-            throw new RuntimeException("Variable duplicada '" + $ID.text + "' en línea " + $ID.getLine());
+    tipo = (INT | FLOAT | BOOL | STRING | CHAR) ID (OP_ASIGN expr)? {
+        String varName = $ID.text;
+        if (symbolTable.containsKey(varName)) {
+            throw new RuntimeException("Variable duplicada '" + varName + "' en línea " + $ID.getLine());
         }
-        symbolTable.put($ID.text, $tipo.text.toLowerCase());
+        boolean isInitialized = $OP_ASIGN != null;
+        symbolTable.put(varName, new VariableInfo($tipo.text.toLowerCase(), isInitialized));
     }
     ;
 
 incdec:
-    ID { checkVariableExists($ID.text, $ID); } (INC | DEC)
+    ID { 
+        checkVariableExists($ID.text, $ID);
+        VariableInfo info = symbolTable.get($ID.text);
+        checkVariableInitialized($ID.text, $ID);
+    } (INC | DEC)
     ;
 
 ifdecla:
@@ -82,7 +113,10 @@ termino:
 
 factor:
     NUM
-    | ID { checkVariableExists($ID.text, $ID); }
+    | ID { 
+        checkVariableExists($ID.text, $ID);
+        checkVariableInitialized($ID.text, $ID); // <-- ¡Nueva línea!
+    }
     | LPAREN expr RPAREN
     ;
 

@@ -43,42 +43,44 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Integer> {
        }
     
 
-    @Override
-    public Integer visitInstruccion(InstruccionContext ctx) {
-       if (ctx.OP_ASIGN() != null) {
-            String identificador = ctx.ID().getText();
-            int valor = ctx.expr() != null ? visit(ctx.expr()) : visit(ctx.condicional());
-            tablaSimbolos.put(identificador, valor);
-            System.out.println("Se asigno " + identificador + " = " + valor);
-            return valor;
-        } else if(ctx.expr() != null){
-            int result = visit(ctx.expr());
-            System.out.println("Resultado expresion: " + result);
-            return result;
-       } else if(ctx.condicional() != null){
-            int result = visit(ctx.condicional());
-            System.out.println("Resultado condicional: " + result);
-            return result;
-       }else if (ctx.declaracion() != null) {
-            System.out.println("Declaracion de variable tipo " + ctx.declaracion().tipo.getText()+" -> " + ctx.declaracion().ID().getText());
-            tablaSimbolos.put(ctx.declaracion().ID().getText(), visit(ctx.declaracion().expr(0)));
-            return 0;
-        }else if (ctx.ifdecla() != null) {
-            System.out.println("Llegó a la linea de un If: ");
-            int result = visit(ctx.ifdecla());
-            return result;
-        }else if (ctx.fordecla() != null) {
-            System.out.println("Llegó a la linea de un For: ");
-            int result = visit(ctx.fordecla());
-            
-            return result;
-        }else if (ctx.incdec() != null) {
-       
-            int result = visit(ctx.incdec());
-            return result;
-        }
-       return 0;
-    }
+       @Override
+       public Integer visitInstruccion(InstruccionContext ctx) {
+           if (ctx.OP_ASIGN() != null) {
+               String identificador = ctx.ID().getText();
+               int valor = ctx.expr() != null ? visit(ctx.expr()) : visit(ctx.condicional());
+               tablaSimbolos.put(identificador, valor);
+               System.out.println("Se asignó " + identificador + " = " + valor);
+               return valor;
+           } else if (ctx.expr() != null) {
+               int result = visit(ctx.expr());
+               System.out.println("Resultado expresión: " + result);
+               return result;
+           } else if (ctx.condicional() != null) {
+               int result = visit(ctx.condicional());
+               System.out.println("Resultado condicional: " + result);
+               return result;
+           } else if (ctx.declaracion() != null) {
+               String varName = ctx.declaracion().ID().getText();
+               System.out.println("Declaración de variable tipo " + ctx.declaracion().tipo.getText() + " -> " + varName);
+               if (ctx.declaracion().expr() != null && !ctx.declaracion().expr().isEmpty()) {
+                   int value = visit(ctx.declaracion().expr());
+                   tablaSimbolos.put(varName, value);
+               } else {
+                   // Asignar un valor por defecto (ej. 0 para int)
+                   tablaSimbolos.put(varName, 0);
+               }
+               return 0;
+           } else if (ctx.ifdecla() != null) {
+               System.out.println("Llegó a la línea de un If: ");
+               return visit(ctx.ifdecla());
+           } else if (ctx.fordecla() != null) {
+               System.out.println("Llegó a la línea de un For: ");
+               return visit(ctx.fordecla());
+           } else if (ctx.incdec() != null) {
+               return visit(ctx.incdec());
+           }
+           return 0;
+       }
 
 
 

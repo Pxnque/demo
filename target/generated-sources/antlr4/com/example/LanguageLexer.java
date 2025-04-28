@@ -96,12 +96,28 @@ public class LanguageLexer extends Lexer {
 	}
 
 
-	    // Tabla de símbolos para variables declaradas
-	    private HashMap<String, String> symbolTable = new HashMap<>();
+	    class VariableInfo {
+	        String type;
+	        boolean initialized;
+
+	        VariableInfo(String type, boolean initialized) {
+	            this.type = type;
+	            this.initialized = initialized;
+	        }
+	    }
+
+	    private HashMap<String, VariableInfo> symbolTable = new HashMap<>();
 	    
 	    private void checkVariableExists(String varName, Token token) {
 	        if (!symbolTable.containsKey(varName)) {
 	            throw new RuntimeException("Variable no declarada '" + varName + "' en línea " + token.getLine());
+	        }
+	    }
+	    
+	    private void checkVariableInitialized(String varName, Token token) {
+	        VariableInfo info = symbolTable.get(varName);
+	        if (info != null && !info.initialized) {
+	            throw new RuntimeException("Variable no inicializada '" + varName + "' en línea " + token.getLine());
 	        }
 	    }
 	    
