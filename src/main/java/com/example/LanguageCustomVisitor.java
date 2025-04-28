@@ -78,6 +78,14 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Integer> {
                return visit(ctx.fordecla());
            } else if (ctx.incdec() != null) {
                return visit(ctx.incdec());
+           }else if (ctx.print() != null) {
+              if(ctx.print().expr() != null) {
+                  int result = visit(ctx.print().expr());
+                  System.out.println(result);
+              } else {
+                System.out.println("Error: está vacio el print");
+              }
+              
            }
            return 0;
        }

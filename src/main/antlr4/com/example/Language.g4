@@ -62,7 +62,7 @@ instruccion:
     ;
 
 print
-    : 
+    : PRINT LPAREN (expr) RPAREN 
     ;
 
 declaracion:
@@ -115,7 +115,7 @@ factor:
     NUM
     | ID { 
         checkVariableExists($ID.text, $ID);
-        checkVariableInitialized($ID.text, $ID); // <-- ¡Nueva línea!
+        checkVariableInitialized($ID.text, $ID); 
     }
     | LPAREN expr RPAREN
     ;
@@ -149,6 +149,7 @@ STRING : 'string' ;
 CHAR : 'char' ;
 INC : '++' ;
 DEC : '--' ;
+PRINT: 'print' ;
 
 NUM : [0-9]+ ;
 ID: [a-zA-Z_][a-zA-Z_0-9]* ;
