@@ -41,116 +41,119 @@ import java.util.HashMap;
     }
 }
 
-program
-    : instruccion+ EOF
-    ;
+program: instruccion+ EOF;
 
 instruccion:
-    ID OP_ASIGN (expr | condicional) {
+	ID OP_ASIGN (expr | condicional) {
         String varName = $ID.text;
         checkVariableExists(varName, $ID);
         VariableInfo info = symbolTable.get(varName);
         info.initialized = true;
     }
-    | expr
-    | condicional
-    | declaracion
-    | ifdecla
-    | fordecla
-    | incdec
-    | print
-    ;
+	| expr
+	| condicional
+	| declaracion
+	| ifdecla
+	| fordecla
+	| incdec
+	| print;
 
-print
-    : PRINT LPAREN (expr) RPAREN 
-    ;
+print: PRINT LPAREN (expr) RPAREN;
 
 declaracion:
-    tipo = (INT | FLOAT | BOOL | STRING | CHAR) ID (OP_ASIGN expr)? {
+	tipo = (INT | FLOAT | BOOL | STRING | CHAR) ID (
+		OP_ASIGN expr
+	)? {
         String varName = $ID.text;
         if (symbolTable.containsKey(varName)) {
             throw new RuntimeException("Variable duplicada '" + varName + "' en línea " + $ID.getLine());
         }
         boolean isInitialized = $OP_ASIGN != null;
         symbolTable.put(varName, new VariableInfo($tipo.text.toLowerCase(), isInitialized));
-    }
-    ;
+    };
 
 incdec:
-    ID { 
+	ID { 
         checkVariableExists($ID.text, $ID);
         VariableInfo info = symbolTable.get($ID.text);
         checkVariableInitialized($ID.text, $ID);
-    } (INC | DEC)
-    ;
+    } (INC | DEC);
 
 ifdecla:
-    IF LPAREN condicional RPAREN LCURLY instruccion+ RCURLY (ELSEIF LPAREN condicional RPAREN LCURLY instruccion+ RCURLY)* (ELSE LCURLY instruccion+ RCURLY)?
-    ;
+	IF LPAREN condicional RPAREN LCURLY instruccion+ RCURLY (
+		ELSEIF LPAREN condicional RPAREN LCURLY instruccion+ RCURLY
+	)* (ELSE LCURLY instruccion+ RCURLY)?;
 
 condicional:
-    expr (MAYOR | MENOR | MAYORIGUAL | MENORIGUAL | IGUAL | DIFERENTE | OR | AND) expr
-    ;
+	expr (
+		MAYOR
+		| MENOR
+		| MAYORIGUAL
+		| MENORIGUAL
+		| IGUAL
+		| DIFERENTE
+		| OR
+		| AND
+	) expr;
 
 fordecla:
-    FOR LPAREN declaracion SEMI condicional SEMI incdec? RPAREN LCURLY instruccion+ RCURLY
-    ;
+	FOR LPAREN declaracion SEMI condicional SEMI incdec? RPAREN LCURLY instruccion+ RCURLY;
 
-expr:
-    termino (OP_SUMA termino)*
-    | termino (OP_RESTA termino)*
-    ;
+expr: termino (OP_SUMA termino)* | termino (OP_RESTA termino)*;
 
 termino:
-    factor (OP_MULT factor)*
-    | factor (OP_DIV divisor = factor {
+	factor (OP_MULT factor)*
+	| factor (
+		OP_DIV divisor = factor {
         // Validar división por cero en literales
         if ($divisor.ctx.NUM() != null) {
             checkDivisionByZero($divisor.ctx.NUM().getText(), $OP_DIV);
         }
-    })*
-    ;
+    }
+	)*;
 
 factor:
-    NUM
-    | ID { 
+	NUM
+	| STRING_LITERAL
+	| ID { 
         checkVariableExists($ID.text, $ID);
         checkVariableInitialized($ID.text, $ID); 
     }
-    | LPAREN expr RPAREN
-    ;
+	| LPAREN expr RPAREN;
 
-OP_SUMA: '+' ;
-OP_RESTA: '-' ;
-OP_MULT: '*' ;
-OP_DIV: '/' ;
-OP_ASIGN : '=' ;
-SEMI : ';' ;
-LPAREN : '(' ;
-RPAREN : ')' ;
-MAYOR : '>' ;
-MENOR : '<' ;
-MAYORIGUAL : '>=' ;
-MENORIGUAL : '<=' ;
-IGUAL : '==' ;
-DIFERENTE : '!=' ;
-OR : '||' ;
-AND : '&&' ;
-LCURLY : '{' ;
-RCURLY : '}' ;
-IF : 'if' ;
-ELSE : 'else' ;
-ELSEIF : 'else if' ;
-FOR : 'for' ;
-INT : 'int' ;
-FLOAT : 'float' ;
-BOOL : 'bool' ;
-STRING : 'string' ;
-CHAR : 'char' ;
-INC : '++' ;
-DEC : '--' ;
-PRINT: 'print' ;
+OP_SUMA: '+';
+OP_RESTA: '-';
+OP_MULT: '*';
+OP_DIV: '/';
+OP_ASIGN: '=';
+SEMI: ';';
+LPAREN: '(';
+RPAREN: ')';
+MAYOR: '>';
+MENOR: '<';
+MAYORIGUAL: '>=';
+MENORIGUAL: '<=';
+IGUAL: '==';
+DIFERENTE: '!=';
+OR: '||';
+AND: '&&';
+LCURLY: '{';
+RCURLY: '}';
+IF: 'if';
+ELSE: 'else';
+ELSEIF: 'else if';
+FOR: 'for';
+INT: 'int';
+FLOAT: 'float';
+BOOL: 'bool';
+STRING: 'string';
+CHAR: 'char';
+INC: '++';
+DEC: '--';
+PRINT: 'print';
 
-NUM : [0-9]+ ;
-ID: [a-zA-Z_][a-zA-Z_0-9]* ;
-WS: [ \t\n\r\f]+ -> skip ;
+NUM: [0-9]+;
+ID: [a-zA-Z_][a-zA-Z_0-9]*;
+STRING_LITERAL: '"' (~["\r\n])* '"';
+// ON WORK ++ COMMENT: '//' ~[\r\n]* -> skip;
+WS: [ \t\n\r\f]+ -> skip;
