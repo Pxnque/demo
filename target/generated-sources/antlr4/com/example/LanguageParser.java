@@ -1,4 +1,4 @@
-// Generated from com/example/Language.g4 by ANTLR 4.9.2
+// Generated from com\example\Language.g4 by ANTLR 4.9.2
 package com.example;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ public class LanguageParser extends Parser {
 		RPAREN=8, MAYOR=9, MENOR=10, MAYORIGUAL=11, MENORIGUAL=12, IGUAL=13, DIFERENTE=14, 
 		OR=15, AND=16, LCURLY=17, RCURLY=18, IF=19, ELSE=20, ELSEIF=21, FOR=22, 
 		INT=23, FLOAT=24, BOOL=25, STRING=26, CHAR=27, INC=28, DEC=29, PRINT=30, 
-		NUM=31, ID=32, STRING_LITERAL=33, WS=34;
+		TRUE=31, FALSE=32, FLOAT_NUM=33, NUM=34, ID=35, STRING_LITERAL=36, WS=37;
 	public static final int
 		RULE_program = 0, RULE_instruccion = 1, RULE_print = 2, RULE_declaracion = 3, 
 		RULE_incdec = 4, RULE_ifdecla = 5, RULE_condicional = 6, RULE_fordecla = 7, 
@@ -42,7 +42,7 @@ public class LanguageParser extends Parser {
 			null, "'+'", "'-'", "'*'", "'/'", "'='", "';'", "'('", "')'", "'>'", 
 			"'<'", "'>='", "'<='", "'=='", "'!='", "'||'", "'&&'", "'{'", "'}'", 
 			"'if'", "'else'", "'else if'", "'for'", "'int'", "'float'", "'bool'", 
-			"'string'", "'char'", "'++'", "'--'", "'print'"
+			"'string'", "'char'", "'++'", "'--'", "'print'", "'true'", "'false'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -52,7 +52,7 @@ public class LanguageParser extends Parser {
 			"LPAREN", "RPAREN", "MAYOR", "MENOR", "MAYORIGUAL", "MENORIGUAL", "IGUAL", 
 			"DIFERENTE", "OR", "AND", "LCURLY", "RCURLY", "IF", "ELSE", "ELSEIF", 
 			"FOR", "INT", "FLOAT", "BOOL", "STRING", "CHAR", "INC", "DEC", "PRINT", 
-			"NUM", "ID", "STRING_LITERAL", "WS"
+			"TRUE", "FALSE", "FLOAT_NUM", "NUM", "ID", "STRING_LITERAL", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -189,7 +189,7 @@ public class LanguageParser extends Parser {
 				setState(25); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << TRUE) | (1L << FALSE) | (1L << FLOAT_NUM) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
 			setState(27);
 			match(EOF);
 			}
@@ -635,7 +635,7 @@ public class LanguageParser extends Parser {
 				setState(71); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << TRUE) | (1L << FALSE) | (1L << FLOAT_NUM) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
 			setState(73);
 			match(RCURLY);
 			setState(88);
@@ -667,7 +667,7 @@ public class LanguageParser extends Parser {
 					setState(82); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
+				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << TRUE) | (1L << FALSE) | (1L << FLOAT_NUM) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
 				setState(84);
 				match(RCURLY);
 				}
@@ -698,7 +698,7 @@ public class LanguageParser extends Parser {
 					setState(96); 
 					_errHandler.sync(this);
 					_la = _input.LA(1);
-				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
+				} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << TRUE) | (1L << FALSE) | (1L << FLOAT_NUM) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
 				setState(98);
 				match(RCURLY);
 				}
@@ -875,7 +875,7 @@ public class LanguageParser extends Parser {
 				setState(120); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
+			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << LPAREN) | (1L << IF) | (1L << FOR) | (1L << INT) | (1L << FLOAT) | (1L << BOOL) | (1L << STRING) | (1L << CHAR) | (1L << PRINT) | (1L << TRUE) | (1L << FALSE) | (1L << FLOAT_NUM) | (1L << NUM) | (1L << ID) | (1L << STRING_LITERAL))) != 0) );
 			setState(122);
 			match(RCURLY);
 			}
@@ -1104,6 +1104,9 @@ public class LanguageParser extends Parser {
 	public static class FactorContext extends ParserRuleContext {
 		public Token ID;
 		public TerminalNode NUM() { return getToken(LanguageParser.NUM, 0); }
+		public TerminalNode FLOAT_NUM() { return getToken(LanguageParser.FLOAT_NUM, 0); }
+		public TerminalNode TRUE() { return getToken(LanguageParser.TRUE, 0); }
+		public TerminalNode FALSE() { return getToken(LanguageParser.FALSE, 0); }
 		public TerminalNode STRING_LITERAL() { return getToken(LanguageParser.STRING_LITERAL, 0); }
 		public TerminalNode ID() { return getToken(LanguageParser.ID, 0); }
 		public TerminalNode LPAREN() { return getToken(LanguageParser.LPAREN, 0); }
@@ -1134,7 +1137,7 @@ public class LanguageParser extends Parser {
 		FactorContext _localctx = new FactorContext(_ctx, getState());
 		enterRule(_localctx, 20, RULE_factor);
 		try {
-			setState(170);
+			setState(173);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case NUM:
@@ -1144,17 +1147,38 @@ public class LanguageParser extends Parser {
 				match(NUM);
 				}
 				break;
-			case STRING_LITERAL:
+			case FLOAT_NUM:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(163);
+				match(FLOAT_NUM);
+				}
+				break;
+			case TRUE:
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(164);
+				match(TRUE);
+				}
+				break;
+			case FALSE:
+				enterOuterAlt(_localctx, 4);
+				{
+				setState(165);
+				match(FALSE);
+				}
+				break;
+			case STRING_LITERAL:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(166);
 				match(STRING_LITERAL);
 				}
 				break;
 			case ID:
-				enterOuterAlt(_localctx, 3);
+				enterOuterAlt(_localctx, 6);
 				{
-				setState(164);
+				setState(167);
 				((FactorContext)_localctx).ID = match(ID);
 				 
 				        checkVariableExists((((FactorContext)_localctx).ID!=null?((FactorContext)_localctx).ID.getText():null), ((FactorContext)_localctx).ID);
@@ -1163,13 +1187,13 @@ public class LanguageParser extends Parser {
 				}
 				break;
 			case LPAREN:
-				enterOuterAlt(_localctx, 4);
+				enterOuterAlt(_localctx, 7);
 				{
-				setState(166);
+				setState(169);
 				match(LPAREN);
-				setState(167);
+				setState(170);
 				expr();
-				setState(168);
+				setState(171);
 				match(RPAREN);
 				}
 				break;
@@ -1189,7 +1213,7 @@ public class LanguageParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3$\u00af\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\'\u00b2\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\3\2\6\2\32\n\2\r\2\16\2\33\3\2\3\2\3\3\3\3\3\3\3\3\5\3$\n"+
 		"\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\3\5\3/\n\3\3\4\3\4\3\4\3\4\3\4\3"+
@@ -1201,29 +1225,29 @@ public class LanguageParser extends Parser {
 		"\13\n\3\n\3\n\3\n\7\n\u008a\n\n\f\n\16\n\u008d\13\n\5\n\u008f\n\n\3\13"+
 		"\3\13\3\13\7\13\u0094\n\13\f\13\16\13\u0097\13\13\3\13\3\13\3\13\3\13"+
 		"\3\13\7\13\u009e\n\13\f\13\16\13\u00a1\13\13\5\13\u00a3\n\13\3\f\3\f\3"+
-		"\f\3\f\3\f\3\f\3\f\3\f\5\f\u00ad\n\f\3\f\2\2\r\2\4\6\b\n\f\16\20\22\24"+
-		"\26\2\5\3\2\31\35\3\2\36\37\3\2\13\22\2\u00bd\2\31\3\2\2\2\4.\3\2\2\2"+
-		"\6\60\3\2\2\2\b\65\3\2\2\2\n=\3\2\2\2\fA\3\2\2\2\16h\3\2\2\2\20l\3\2\2"+
-		"\2\22\u008e\3\2\2\2\24\u00a2\3\2\2\2\26\u00ac\3\2\2\2\30\32\5\4\3\2\31"+
-		"\30\3\2\2\2\32\33\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2\34\35\3\2\2\2\35"+
-		"\36\7\2\2\3\36\3\3\2\2\2\37 \7\"\2\2 #\7\7\2\2!$\5\22\n\2\"$\5\16\b\2"+
-		"#!\3\2\2\2#\"\3\2\2\2$%\3\2\2\2%&\b\3\1\2&/\3\2\2\2\'/\5\22\n\2(/\5\16"+
-		"\b\2)/\5\b\5\2*/\5\f\7\2+/\5\20\t\2,/\5\n\6\2-/\5\6\4\2.\37\3\2\2\2.\'"+
-		"\3\2\2\2.(\3\2\2\2.)\3\2\2\2.*\3\2\2\2.+\3\2\2\2.,\3\2\2\2.-\3\2\2\2/"+
-		"\5\3\2\2\2\60\61\7 \2\2\61\62\7\t\2\2\62\63\5\22\n\2\63\64\7\n\2\2\64"+
-		"\7\3\2\2\2\65\66\t\2\2\2\669\7\"\2\2\678\7\7\2\28:\5\22\n\29\67\3\2\2"+
-		"\29:\3\2\2\2:;\3\2\2\2;<\b\5\1\2<\t\3\2\2\2=>\7\"\2\2>?\b\6\1\2?@\t\3"+
-		"\2\2@\13\3\2\2\2AB\7\25\2\2BC\7\t\2\2CD\5\16\b\2DE\7\n\2\2EG\7\23\2\2"+
-		"FH\5\4\3\2GF\3\2\2\2HI\3\2\2\2IG\3\2\2\2IJ\3\2\2\2JK\3\2\2\2KZ\7\24\2"+
-		"\2LM\7\27\2\2MN\7\t\2\2NO\5\16\b\2OP\7\n\2\2PR\7\23\2\2QS\5\4\3\2RQ\3"+
-		"\2\2\2ST\3\2\2\2TR\3\2\2\2TU\3\2\2\2UV\3\2\2\2VW\7\24\2\2WY\3\2\2\2XL"+
-		"\3\2\2\2Y\\\3\2\2\2ZX\3\2\2\2Z[\3\2\2\2[f\3\2\2\2\\Z\3\2\2\2]^\7\26\2"+
-		"\2^`\7\23\2\2_a\5\4\3\2`_\3\2\2\2ab\3\2\2\2b`\3\2\2\2bc\3\2\2\2cd\3\2"+
-		"\2\2de\7\24\2\2eg\3\2\2\2f]\3\2\2\2fg\3\2\2\2g\r\3\2\2\2hi\5\22\n\2ij"+
-		"\t\4\2\2jk\5\22\n\2k\17\3\2\2\2lm\7\30\2\2mn\7\t\2\2no\5\b\5\2op\7\b\2"+
-		"\2pq\5\16\b\2qs\7\b\2\2rt\5\n\6\2sr\3\2\2\2st\3\2\2\2tu\3\2\2\2uv\7\n"+
-		"\2\2vx\7\23\2\2wy\5\4\3\2xw\3\2\2\2yz\3\2\2\2zx\3\2\2\2z{\3\2\2\2{|\3"+
-		"\2\2\2|}\7\24\2\2}\21\3\2\2\2~\u0083\5\24\13\2\177\u0080\7\3\2\2\u0080"+
+		"\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\5\f\u00b0\n\f\3\f\2\2\r\2\4\6\b\n\f"+
+		"\16\20\22\24\26\2\5\3\2\31\35\3\2\36\37\3\2\13\22\2\u00c3\2\31\3\2\2\2"+
+		"\4.\3\2\2\2\6\60\3\2\2\2\b\65\3\2\2\2\n=\3\2\2\2\fA\3\2\2\2\16h\3\2\2"+
+		"\2\20l\3\2\2\2\22\u008e\3\2\2\2\24\u00a2\3\2\2\2\26\u00af\3\2\2\2\30\32"+
+		"\5\4\3\2\31\30\3\2\2\2\32\33\3\2\2\2\33\31\3\2\2\2\33\34\3\2\2\2\34\35"+
+		"\3\2\2\2\35\36\7\2\2\3\36\3\3\2\2\2\37 \7%\2\2 #\7\7\2\2!$\5\22\n\2\""+
+		"$\5\16\b\2#!\3\2\2\2#\"\3\2\2\2$%\3\2\2\2%&\b\3\1\2&/\3\2\2\2\'/\5\22"+
+		"\n\2(/\5\16\b\2)/\5\b\5\2*/\5\f\7\2+/\5\20\t\2,/\5\n\6\2-/\5\6\4\2.\37"+
+		"\3\2\2\2.\'\3\2\2\2.(\3\2\2\2.)\3\2\2\2.*\3\2\2\2.+\3\2\2\2.,\3\2\2\2"+
+		".-\3\2\2\2/\5\3\2\2\2\60\61\7 \2\2\61\62\7\t\2\2\62\63\5\22\n\2\63\64"+
+		"\7\n\2\2\64\7\3\2\2\2\65\66\t\2\2\2\669\7%\2\2\678\7\7\2\28:\5\22\n\2"+
+		"9\67\3\2\2\29:\3\2\2\2:;\3\2\2\2;<\b\5\1\2<\t\3\2\2\2=>\7%\2\2>?\b\6\1"+
+		"\2?@\t\3\2\2@\13\3\2\2\2AB\7\25\2\2BC\7\t\2\2CD\5\16\b\2DE\7\n\2\2EG\7"+
+		"\23\2\2FH\5\4\3\2GF\3\2\2\2HI\3\2\2\2IG\3\2\2\2IJ\3\2\2\2JK\3\2\2\2KZ"+
+		"\7\24\2\2LM\7\27\2\2MN\7\t\2\2NO\5\16\b\2OP\7\n\2\2PR\7\23\2\2QS\5\4\3"+
+		"\2RQ\3\2\2\2ST\3\2\2\2TR\3\2\2\2TU\3\2\2\2UV\3\2\2\2VW\7\24\2\2WY\3\2"+
+		"\2\2XL\3\2\2\2Y\\\3\2\2\2ZX\3\2\2\2Z[\3\2\2\2[f\3\2\2\2\\Z\3\2\2\2]^\7"+
+		"\26\2\2^`\7\23\2\2_a\5\4\3\2`_\3\2\2\2ab\3\2\2\2b`\3\2\2\2bc\3\2\2\2c"+
+		"d\3\2\2\2de\7\24\2\2eg\3\2\2\2f]\3\2\2\2fg\3\2\2\2g\r\3\2\2\2hi\5\22\n"+
+		"\2ij\t\4\2\2jk\5\22\n\2k\17\3\2\2\2lm\7\30\2\2mn\7\t\2\2no\5\b\5\2op\7"+
+		"\b\2\2pq\5\16\b\2qs\7\b\2\2rt\5\n\6\2sr\3\2\2\2st\3\2\2\2tu\3\2\2\2uv"+
+		"\7\n\2\2vx\7\23\2\2wy\5\4\3\2xw\3\2\2\2yz\3\2\2\2zx\3\2\2\2z{\3\2\2\2"+
+		"{|\3\2\2\2|}\7\24\2\2}\21\3\2\2\2~\u0083\5\24\13\2\177\u0080\7\3\2\2\u0080"+
 		"\u0082\5\24\13\2\u0081\177\3\2\2\2\u0082\u0085\3\2\2\2\u0083\u0081\3\2"+
 		"\2\2\u0083\u0084\3\2\2\2\u0084\u008f\3\2\2\2\u0085\u0083\3\2\2\2\u0086"+
 		"\u008b\5\24\13\2\u0087\u0088\7\4\2\2\u0088\u008a\5\24\13\2\u0089\u0087"+
@@ -1235,12 +1259,13 @@ public class LanguageParser extends Parser {
 		"\5\26\f\2\u0099\u009a\7\6\2\2\u009a\u009b\5\26\f\2\u009b\u009c\b\13\1"+
 		"\2\u009c\u009e\3\2\2\2\u009d\u0099\3\2\2\2\u009e\u00a1\3\2\2\2\u009f\u009d"+
 		"\3\2\2\2\u009f\u00a0\3\2\2\2\u00a0\u00a3\3\2\2\2\u00a1\u009f\3\2\2\2\u00a2"+
-		"\u0090\3\2\2\2\u00a2\u0098\3\2\2\2\u00a3\25\3\2\2\2\u00a4\u00ad\7!\2\2"+
-		"\u00a5\u00ad\7#\2\2\u00a6\u00a7\7\"\2\2\u00a7\u00ad\b\f\1\2\u00a8\u00a9"+
-		"\7\t\2\2\u00a9\u00aa\5\22\n\2\u00aa\u00ab\7\n\2\2\u00ab\u00ad\3\2\2\2"+
-		"\u00ac\u00a4\3\2\2\2\u00ac\u00a5\3\2\2\2\u00ac\u00a6\3\2\2\2\u00ac\u00a8"+
-		"\3\2\2\2\u00ad\27\3\2\2\2\24\33#.9ITZbfsz\u0083\u008b\u008e\u0095\u009f"+
-		"\u00a2\u00ac";
+		"\u0090\3\2\2\2\u00a2\u0098\3\2\2\2\u00a3\25\3\2\2\2\u00a4\u00b0\7$\2\2"+
+		"\u00a5\u00b0\7#\2\2\u00a6\u00b0\7!\2\2\u00a7\u00b0\7\"\2\2\u00a8\u00b0"+
+		"\7&\2\2\u00a9\u00aa\7%\2\2\u00aa\u00b0\b\f\1\2\u00ab\u00ac\7\t\2\2\u00ac"+
+		"\u00ad\5\22\n\2\u00ad\u00ae\7\n\2\2\u00ae\u00b0\3\2\2\2\u00af\u00a4\3"+
+		"\2\2\2\u00af\u00a5\3\2\2\2\u00af\u00a6\3\2\2\2\u00af\u00a7\3\2\2\2\u00af"+
+		"\u00a8\3\2\2\2\u00af\u00a9\3\2\2\2\u00af\u00ab\3\2\2\2\u00b0\27\3\2\2"+
+		"\2\24\33#.9ITZbfsz\u0083\u008b\u008e\u0095\u009f\u00a2\u00af";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

@@ -52,7 +52,19 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
                 Object value = visit(ctx.declaracion().expr());
                 tablaSimbolos.put(varName, value);
             } else {
-                tablaSimbolos.put(varName, 0); // valor por defecto
+                // Valores por defecto según el tipo
+                String tipo = ctx.declaracion().tipo.getText();
+                if (tipo.equals("int")) {
+                    tablaSimbolos.put(varName, 0);
+                } else if (tipo.equals("float")) {
+                    tablaSimbolos.put(varName, 0.0f);
+                } else if (tipo.equals("bool")) {
+                    tablaSimbolos.put(varName, false);
+                } else if (tipo.equals("string")) {
+                    tablaSimbolos.put(varName, "");
+                } else if (tipo.equals("char")) {
+                    tablaSimbolos.put(varName, '\0');
+                }
             }
             return null;
         } else if (ctx.ifdecla() != null) {
@@ -82,21 +94,38 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
     @Override
     public Object visitIncdec(IncdecContext ctx) {
         String id = ctx.ID().getText();
-        if (!tablaSimbolos.containsKey(id) || !(tablaSimbolos.get(id) instanceof Integer)) {
-            System.out.println("Error: Variable " + id + " no declarada o no es entera");
+        if (!tablaSimbolos.containsKey(id)) {
+            System.out.println("Error: Variable " + id + " no declarada");
             return null;
         }
-
-        int value = (Integer) tablaSimbolos.get(id);
-        if (ctx.INC() != null) {
-            value++;
-            System.out.println("Se incrementó " + id + " = " + value);
-        } else if (ctx.DEC() != null) {
-            value--;
-            System.out.println("Se decrementó " + id + " = " + value);
+        
+        Object value = tablaSimbolos.get(id);
+        if (value instanceof Integer) {
+            Integer intVal = (Integer) value;
+            if (ctx.INC() != null) {
+                intVal++;
+                System.out.println("Se incrementó " + id + " = " + intVal);
+            } else if (ctx.DEC() != null) {
+                intVal--;
+                System.out.println("Se decrementó " + id + " = " + intVal);
+            }
+            tablaSimbolos.put(id, intVal);
+            return intVal;
+        } else if (value instanceof Float) {
+            Float floatVal = (Float) value;
+            if (ctx.INC() != null) {
+                floatVal++;
+                System.out.println("Se incrementó " + id + " = " + floatVal);
+            } else if (ctx.DEC() != null) {
+                floatVal--;
+                System.out.println("Se decrementó " + id + " = " + floatVal);
+            }
+            tablaSimbolos.put(id, floatVal);
+            return floatVal;
+        } else {
+            System.out.println("Error: Incremento/decremento solo aplicable a números");
+            return null;
         }
-        tablaSimbolos.put(id, value);
-        return value;
     }
 
     @Override
@@ -104,12 +133,12 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         Object result = null;
         if (ctx.declaracion() != null) {
             String varName = ctx.declaracion().ID().getText();
-            Object initVal = visit(ctx.declaracion().expr(0));
+            Object initVal = visit(ctx.declaracion().expr());
             tablaSimbolos.put(varName, initVal);
             System.out.println("Declaración de variable " + varName + " = " + initVal);
         }
 
-        while ((Integer) visit(ctx.condicional()) == 1) {
+        while (evaluarCondicion(visit(ctx.condicional()))) {
             for (InstruccionContext instr : ctx.instruccion()) {
                 visit(instr);
             }
@@ -122,27 +151,60 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         return result;
     }
 
+    private boolean evaluarCondicion(Object condicion) {
+        if (condicion instanceof Integer) {
+            return ((Integer) condicion) == 1;
+        } else if (condicion instanceof Boolean) {
+            return (Boolean) condicion;
+        }
+        return false;
+    }
+
     @Override
     public Object visitCondicional(CondicionalContext ctx) {
         Object left = visit(ctx.expr(0));
         Object right = visit(ctx.expr(1));
 
-        if (!(left instanceof Integer) || !(right instanceof Integer)) {
-            throw new RuntimeException("Condicionales solo soportan enteros por ahora");
+        // Si ambos son números, realizar comparación numérica
+        if ((left instanceof Number) && (right instanceof Number)) {
+            double l = ((Number) left).doubleValue();
+            double r = ((Number) right).doubleValue();
+            
+            if (ctx.MAYOR() != null) return l > r ? 1 : 0;
+            if (ctx.MENOR() != null) return l < r ? 1 : 0;
+            if (ctx.MAYORIGUAL() != null) return l >= r ? 1 : 0;
+            if (ctx.MENORIGUAL() != null) return l <= r ? 1 : 0;
+            if (ctx.IGUAL() != null) return l == r ? 1 : 0;
+            if (ctx.DIFERENTE() != null) return l != r ? 1 : 0;
         }
-
-        int l = (Integer) left;
-        int r = (Integer) right;
-
-        if (ctx.MAYOR() != null) return l > r ? 1 : 0;
-        if (ctx.MENOR() != null) return l < r ? 1 : 0;
-        if (ctx.MAYORIGUAL() != null) return l >= r ? 1 : 0;
-        if (ctx.MENORIGUAL() != null) return l <= r ? 1 : 0;
-        if (ctx.IGUAL() != null) return l == r ? 1 : 0;
-        if (ctx.DIFERENTE() != null) return l != r ? 1 : 0;
-        if (ctx.AND() != null) return (l == 1 && r == 1) ? 1 : 0;
-        if (ctx.OR() != null) return (l == 1 || r == 1) ? 1 : 0;
-        return 0;
+        // Para tipos booleanos
+        else if ((left instanceof Boolean) && (right instanceof Boolean)) {
+            boolean l = (Boolean) left;
+            boolean r = (Boolean) right;
+            
+            if (ctx.IGUAL() != null) return l == r ? 1 : 0;
+            if (ctx.DIFERENTE() != null) return l != r ? 1 : 0;
+            if (ctx.AND() != null) return (l && r) ? 1 : 0;
+            if (ctx.OR() != null) return (l || r) ? 1 : 0;
+        }
+        // Para comparación de strings
+        else if ((left instanceof String) && (right instanceof String)) {
+            String l = (String) left;
+            String r = (String) right;
+            
+            if (ctx.IGUAL() != null) return l.equals(r) ? 1 : 0;
+            if (ctx.DIFERENTE() != null) return !l.equals(r) ? 1 : 0;
+        }
+        // Operadores lógicos cuando left y right son valores condicionales (0 o 1)
+        else if (left instanceof Integer && right instanceof Integer) {
+            boolean l = ((Integer) left) == 1;
+            boolean r = ((Integer) right) == 1;
+            
+            if (ctx.AND() != null) return (l && r) ? 1 : 0;
+            if (ctx.OR() != null) return (l || r) ? 1 : 0;
+        }
+        
+        throw new RuntimeException("Tipos incompatibles en condicional: " + left.getClass() + " y " + right.getClass());
     }
 
     @Override
@@ -151,11 +213,23 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         for (int i = 1; i < ctx.termino().size(); i++) {
             Object right = visit(ctx.termino(i));
 
-            if (result instanceof Integer && right instanceof Integer) {
+            if ((result instanceof Integer) && (right instanceof Integer)) {
                 if (ctx.OP_SUMA(i - 1) != null) {
                     result = (Integer) result + (Integer) right;
                 } else if (ctx.OP_RESTA(i - 1) != null) {
                     result = (Integer) result - (Integer) right;
+                }
+            } else if ((result instanceof Float) || (right instanceof Float)) {
+                // Convertir a float si alguno es float
+                float leftVal = (result instanceof Integer) ? 
+                                ((Integer) result).floatValue() : (Float) result;
+                float rightVal = (right instanceof Integer) ? 
+                                ((Integer) right).floatValue() : (Float) right;
+                
+                if (ctx.OP_SUMA(i - 1) != null) {
+                    result = leftVal + rightVal;
+                } else if (ctx.OP_RESTA(i - 1) != null) {
+                    result = leftVal - rightVal;
                 }
             } else if (result instanceof String || right instanceof String) {
                 if (ctx.OP_SUMA(i - 1) != null) {
@@ -176,14 +250,32 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         for (int i = 1; i < ctx.factor().size(); i++) {
             Object right = visit(ctx.factor(i));
 
-            if (result instanceof Integer && right instanceof Integer) {
+            if ((result instanceof Integer) && (right instanceof Integer)) {
                 if (ctx.OP_MULT(i - 1) != null) {
                     result = (Integer) result * (Integer) right;
                 } else if (ctx.OP_DIV(i - 1) != null) {
+                    if ((Integer) right == 0) {
+                        throw new RuntimeException("División por cero");
+                    }
                     result = (Integer) result / (Integer) right;
                 }
+            } else if ((result instanceof Float) || (right instanceof Float)) {
+                // Convertir a float si alguno es float
+                float leftVal = (result instanceof Integer) ? 
+                                ((Integer) result).floatValue() : (Float) result;
+                float rightVal = (right instanceof Integer) ? 
+                                ((Integer) right).floatValue() : (Float) right;
+                
+                if (ctx.OP_MULT(i - 1) != null) {
+                    result = leftVal * rightVal;
+                } else if (ctx.OP_DIV(i - 1) != null) {
+                    if (rightVal == 0.0f) {
+                        throw new RuntimeException("División por cero");
+                    }
+                    result = leftVal / rightVal;
+                }
             } else {
-                throw new RuntimeException("Solo se permiten operaciones aritméticas entre enteros");
+                throw new RuntimeException("Solo se permiten operaciones aritméticas entre números");
             }
         }
         return result;
@@ -193,6 +285,12 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
     public Object visitFactor(FactorContext ctx) {
         if (ctx.NUM() != null) {
             return Integer.parseInt(ctx.NUM().getText());
+        } else if (ctx.FLOAT_NUM() != null) {
+            return Float.parseFloat(ctx.FLOAT_NUM().getText());
+        } else if (ctx.TRUE() != null) {
+            return Boolean.TRUE;
+        } else if (ctx.FALSE() != null) {
+            return Boolean.FALSE;
         } else if (ctx.STRING_LITERAL() != null) {
             String raw = ctx.STRING_LITERAL().getText();
             return raw.substring(1, raw.length() - 1); // quitar comillas

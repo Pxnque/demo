@@ -114,6 +114,9 @@ termino:
 
 factor:
 	NUM
+	| FLOAT_NUM
+	| TRUE 
+	| FALSE
 	| STRING_LITERAL
 	| ID { 
         checkVariableExists($ID.text, $ID);
@@ -151,7 +154,11 @@ CHAR: 'char';
 INC: '++';
 DEC: '--';
 PRINT: 'print';
+TRUE: 'true';
+FALSE: 'false';
 
+// Definimos los números de manera que permita enteros y flotantes
+FLOAT_NUM: [0-9]+ '.' [0-9]+;
 NUM: [0-9]+;
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 STRING_LITERAL: '"' (~["\r\n])* '"';

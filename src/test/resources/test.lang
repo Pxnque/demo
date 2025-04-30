@@ -2,3 +2,8 @@ int x = 1
 string s = "mundo"
 print("hola")
 print(s)
+print(x)
+float z = 6.6
+bool y = false
+print(y)
+
