@@ -1,159 +1,101 @@
 grammar Language;
 
-@header {
-import java.util.HashMap;
-}
-
-@members {
-    class VariableInfo {
-        String type;
-        boolean initialized;
-
-        VariableInfo(String type, boolean initialized) {
-            this.type = type;
-            this.initialized = initialized;
-        }
-    }
-
-    private HashMap<String, VariableInfo> symbolTable = new HashMap<>();
-    
-    private void checkVariableExists(String varName, Token token) {
-        if (!symbolTable.containsKey(varName)) {
-            throw new RuntimeException("Variable no declarada '" + varName + "' en línea " + token.getLine());
-        }
-    }
-    
-    private void checkVariableInitialized(String varName, Token token) {
-        VariableInfo info = symbolTable.get(varName);
-        if (info != null && !info.initialized) {
-            throw new RuntimeException("Variable no inicializada '" + varName + "' en línea " + token.getLine());
-        }
-    }
-    
-    private void checkDivisionByZero(String divisorValue, Token opToken) {
-        try {
-            if (Integer.parseInt(divisorValue) == 0) {
-                throw new RuntimeException("División por cero detectada en línea " + opToken.getLine());
-            }
-        } catch (NumberFormatException e) {
-            // No es un número entero, validación solo para literales
-        }
-    }
-}
-
+// Programa principal
 program: instruccion+ EOF;
 
-instruccion:
-	ID OP_ASIGN (expr | condicional) {
-        String varName = $ID.text;
-        checkVariableExists(varName, $ID);
-        VariableInfo info = symbolTable.get(varName);
-        info.initialized = true;
-    }
-	| expr
-	| condicional
-	| declaracion
-	| ifdecla
-	| fordecla
-	| incdec
-	| print;
+// Instrucciones
+instruccion: 
+    declaracion PUNTO_COMA  #instruccionDeclaracion
+    | asig PUNTO_COMA       #instruccionAsignacion
+    | expr PUNTO_COMA       #instruccionExpresion
+    | condicional PUNTO_COMA #instruccionCondicional
+    | ifInstr               #instruccionIf
+    | forInstr              #instruccionFor
+    ;
 
-print: PRINT LPAREN (expr) RPAREN;
+// Declaración de variables
+declaracion: 
+    TIPO ID                     #declaracionSimple
+    | TIPO ID '=' expr          #declaracionConAsignacion
+    | TIPO ID '=' condicional   #declaracionConAsignacionCond
+    ;
 
-declaracion:
-	tipo = (INT | FLOAT | BOOL | STRING | CHAR) ID (
-		OP_ASIGN expr
-	)? {
-        String varName = $ID.text;
-        if (symbolTable.containsKey(varName)) {
-            throw new RuntimeException("Variable duplicada '" + varName + "' en línea " + $ID.getLine());
-        }
-        boolean isInitialized = $OP_ASIGN != null;
-        symbolTable.put(varName, new VariableInfo($tipo.text.toLowerCase(), isInitialized));
-    };
+// Asignación
+asig: 
+    ID '=' expr
+    | ID '=' condicional
+    ;
 
-incdec:
-	ID { 
-        checkVariableExists($ID.text, $ID);
-        VariableInfo info = symbolTable.get($ID.text);
-        checkVariableInitialized($ID.text, $ID);
-    } (INC | DEC);
+// Estructuras de control
+ifInstr: 
+    IF '(' condicional ')' '{' ifbody '}' 
+    (ELSEIF '(' condicional ')' '{' elseifbody '}')* 
+    (ELSE '{' elsebody '}')?
+    ;
 
-ifdecla:
-	IF LPAREN condicional RPAREN LCURLY instruccion+ RCURLY (
-		ELSEIF LPAREN condicional RPAREN LCURLY instruccion+ RCURLY
-	)* (ELSE LCURLY instruccion+ RCURLY)?;
+ifbody: instruccion*;
+elseifbody: instruccion*;
+elsebody: instruccion*;
 
-condicional:
-	expr (
-		MAYOR
-		| MENOR
-		| MAYORIGUAL
-		| MENORIGUAL
-		| IGUAL
-		| DIFERENTE
-		| OR
-		| AND
-	) expr;
+forInstr: 
+    FOR '(' declaracion PUNTO_COMA condicional PUNTO_COMA expr? ')' '{' forBody '}'
+    ;
 
-fordecla:
-	FOR LPAREN declaracion SEMI condicional SEMI incdec? RPAREN LCURLY instruccion+ RCURLY;
+forBody: instruccion*;
 
-expr: termino (OP_SUMA termino)* | termino (OP_RESTA termino)*;
+// Condicionales
+condicional: expr opComparacion expr;
 
-termino:
-	factor (OP_MULT factor)*
-	| factor (
-		OP_DIV divisor = factor {
-        // Validar división por cero en literales
-        if ($divisor.ctx.NUM() != null) {
-            checkDivisionByZero($divisor.ctx.NUM().getText(), $OP_DIV);
-        }
-    }
-	)*;
+opComparacion: 
+    '>' | '<' | '==' 
+    ;
 
-factor:
-	NUM
-	| STRING_LITERAL
-	| ID { 
-        checkVariableExists($ID.text, $ID);
-        checkVariableInitialized($ID.text, $ID); 
-    }
-	| LPAREN expr RPAREN;
+// Expresiones aritméticas
+expr: 
+    termino (OP_SUMA termino | OP_RESTA termino)*
+    ;
 
+termino: 
+    factor (OP_MULT factor | OP_DIV factor)*
+    ;
+
+factor: 
+    NUM                       #factorNumero
+    | FLOAT                    #factorFloat
+    | LITERAL                  #factorTexto
+    | BOOL                     #factorBooleano
+    | ID OP_INCREMENTO         #factorIncremento
+    | ID                       #factorId
+    | '(' expr ')'             #factorParentesis
+    ;
+
+// Tokens
+// Tipos de datos correspondientes a Variable.Tipo
+TIPO: 'int'   // Variable.Tipo.INT
+    | 'float' // Variable.Tipo.FLOAT
+    | 'str'   // Variable.Tipo.STRING
+    | 'bool'  // Variable.Tipo.BOOLEAN
+    ;
+IF: 'if';
+ELSEIF: 'elseif';  
+ELSE: 'else';
+FOR: 'for';
+BOOL: 'true' | 'false';
+// Identificadores - deben tener menor prioridad que las palabras clave
+ID: [a-zA-Z_][a-zA-Z0-9_]*;
+NUM: [0-9]+;
+FLOAT: [0-9]+ '.' [0-9]+;
+LITERAL: '"' (~["\r\n])* '"';
 OP_SUMA: '+';
 OP_RESTA: '-';
 OP_MULT: '*';
 OP_DIV: '/';
-OP_ASIGN: '=';
-SEMI: ';';
-LPAREN: '(';
-RPAREN: ')';
-MAYOR: '>';
-MENOR: '<';
-MAYORIGUAL: '>=';
-MENORIGUAL: '<=';
-IGUAL: '==';
-DIFERENTE: '!=';
-OR: '||';
-AND: '&&';
-LCURLY: '{';
-RCURLY: '}';
-IF: 'if';
-ELSE: 'else';
-ELSEIF: 'else if';
-FOR: 'for';
-INT: 'int';
-FLOAT: 'float';
-BOOL: 'bool';
-STRING: 'string';
-CHAR: 'char';
-INC: '++';
-DEC: '--';
-PRINT: 'print';
+OP_INCREMENTO: '++';
+PUNTO_COMA: ';';
 
-NUM: [0-9]+;
-ID: [a-zA-Z_][a-zA-Z_0-9]*;
-STRING_LITERAL: '"' (~["\r\n])* '"';
-// ON WORK ++ COMMENT: '//' ~[\r\n]* -> skip;
-WS: [ \t\n\r\f]+ -> skip;
+// Ignorar espacios en blanco
+WS: [ \t\r\n]+ -> skip;
+
+// Comentarios
+COMENTARIO: '//' ~[\r\n]* -> skip;
+COMENTARIO_MULTI: '/*' .*? '*/' -> skip;

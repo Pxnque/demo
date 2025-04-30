@@ -4,208 +4,378 @@ import java.util.HashMap;
 
 import com.example.LanguageParser.*;
 
-public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
+public class LanguageCustomVisitor extends LanguageBaseVisitor<Variable> {
 
-    public final HashMap<String, Object> tablaSimbolos = new HashMap<>();
+    public final HashMap<String, Variable> tablaSimbolos = new HashMap<>();
 
     @Override
-    public Object visitProgram(ProgramContext ctx) {
-        Object result = null;
-        for (InstruccionContext instr : ctx.instruccion()) {
+    public Variable visitProgram(ProgramContext ctx) {
+        Variable result = null;
+        for(InstruccionContext instr: ctx.instruccion()){
             result = visit(instr);
         }
+
         return result;
     }
 
     @Override
-    public Object visitIfdecla(IfdeclaContext ctx) {
-        Object result = null;
-        if (ctx.condicional() != null) {
-            System.out.println("Condicion: ");
-            for (InstruccionContext instr : ctx.instruccion()) {
-                result = visit(instr);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Object visitInstruccion(InstruccionContext ctx) {
-        if (ctx.OP_ASIGN() != null) {
-            String identificador = ctx.ID().getText();
-            Object valor = ctx.expr() != null ? visit(ctx.expr()) : visit(ctx.condicional());
-            tablaSimbolos.put(identificador, valor);
-            System.out.println("Se asignó " + identificador + " = " + valor);
-            return valor;
-        } else if (ctx.expr() != null) {
-            Object result = visit(ctx.expr());
-            System.out.println("Resultado expresión: " + result);
-            return result;
-        } else if (ctx.condicional() != null) {
-            Object result = visit(ctx.condicional());
-            System.out.println("Resultado condicional: " + result);
-            return result;
-        } else if (ctx.declaracion() != null) {
-            String varName = ctx.declaracion().ID().getText();
-            System.out.println("Declaración de variable tipo " + ctx.declaracion().tipo.getText() + " -> " + varName);
-            if (ctx.declaracion().expr() != null && !ctx.declaracion().expr().isEmpty()) {
-                Object value = visit(ctx.declaracion().expr());
-                tablaSimbolos.put(varName, value);
-            } else {
-                tablaSimbolos.put(varName, 0); // valor por defecto
-            }
-            return null;
-        } else if (ctx.ifdecla() != null) {
-            System.out.println("Llegó a la línea de un If: ");
-            return visit(ctx.ifdecla());
-        } else if (ctx.fordecla() != null) {
-            System.out.println("Llegó a la línea de un For: ");
-            return visit(ctx.fordecla());
-        } else if (ctx.incdec() != null) {
-            return visit(ctx.incdec());
-        } else if (ctx.print() != null) {
-            if (ctx.print().expr() != null) {
-                Object result = visit(ctx.print().expr());
-                System.out.println(result);
-            } else {
-                System.out.println("Error: está vacío el print");
-            }
+    public Variable visitInstruccion(InstruccionContext ctx) {
+        if(ctx.declaracion() != null){
+            return visit(ctx.declaracion());
+        } else if(ctx.asig() != null){
+            return visit(ctx.asig());
+        } else if(ctx.expr() != null){
+            return(visit(ctx.expr()));
+        } else if(ctx.condicional() != null){
+            return(visit(ctx.condicional()));
+        } else if(ctx.ifInstr() != null){
+            return(visit(ctx.ifInstr()));
+        } else if(ctx.forInstr() != null){
+            return(visit(ctx.forInstr()));
         }
         return null;
     }
 
     @Override
-    public Object visitDeclaracion(DeclaracionContext ctx) {
-        return super.visitDeclaracion(ctx);
+    public Variable visitDeclaracionConAsignacion(DeclaracionConAsignacionContext ctx) {
+        String tipoString = ctx.TIPO().getText();
+        Variable.Tipo tipo;
+
+        switch (tipoString) {
+            case "int": tipo = Variable.Tipo.INT; break;
+            case "float": tipo = Variable.Tipo.FLOAT; break;
+            case "bool": tipo = Variable.Tipo.BOOLEAN; break;
+            case "str": tipo = Variable.Tipo.STRING; break;
+            default: throw new RuntimeException("Error: Tipo de variable desconocido: " + tipoString + ". (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        tablaSimbolos.put(ctx.asig().ID().getText(), new Variable(tipo, null));
+        System.out.println("Declaración: " + ctx.asig().ID().getText() + " de tipo " + tipo);
+
+        Variable asignada = visit(ctx.asig());
+        if (tipo != asignada.tipo) {
+            throw new RuntimeException("Error: Tipo en asignación: se esperaba " + tipo + " y se recibió " + asignada.tipo +". (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        tablaSimbolos.put(ctx.asig().ID().getText(), asignada);
+        System.out.println("Declaración con asignación: " + ctx.asig().ID().getText() + " = " + asignada.valor);
+        return null;
     }
 
     @Override
-    public Object visitIncdec(IncdecContext ctx) {
+    public Variable visitDeclaracionSimple(DeclaracionSimpleContext ctx) {
+        String tipoString = ctx.TIPO().getText();
         String id = ctx.ID().getText();
-        if (!tablaSimbolos.containsKey(id) || !(tablaSimbolos.get(id) instanceof Integer)) {
-            System.out.println("Error: Variable " + id + " no declarada o no es entera");
-            return null;
+
+        if(tablaSimbolos.get(id) != null){
+            throw new RuntimeException("Error: La variable "+ id +" ya ha sido declarada.(Line:"+ctx.getStart().getLine()+")");
         }
 
-        int value = (Integer) tablaSimbolos.get(id);
-        if (ctx.INC() != null) {
-            value++;
-            System.out.println("Se incrementó " + id + " = " + value);
-        } else if (ctx.DEC() != null) {
-            value--;
-            System.out.println("Se decrementó " + id + " = " + value);
+        Variable.Tipo tipo;
+
+        switch (tipoString) {
+            case "int": tipo = Variable.Tipo.INT; break;
+            case "float": tipo = Variable.Tipo.FLOAT; break;
+            case "bool": tipo = Variable.Tipo.BOOLEAN; break;
+            case "str": tipo = Variable.Tipo.STRING; break;
+            default: throw new RuntimeException("Tipo de variable desconocido: " + tipoString +". (Line:"+ctx.getStart().getLine()+")");
         }
-        tablaSimbolos.put(id, value);
-        return value;
+
+        tablaSimbolos.put(id, new Variable(tipo, null));
+        System.out.println("Declaración: " + id + " de tipo " + tipo);
+        return null;
     }
 
     @Override
-    public Object visitFordecla(FordeclaContext ctx) {
-        Object result = null;
-        if (ctx.declaracion() != null) {
-            String varName = ctx.declaracion().ID().getText();
-            Object initVal = visit(ctx.declaracion().expr(0));
-            tablaSimbolos.put(varName, initVal);
-            System.out.println("Declaración de variable " + varName + " = " + initVal);
-        }
+    public Variable visitAsig(AsigContext ctx) {
+        String id = ctx.ID().getText();
+        Variable valor;
 
-        while ((Integer) visit(ctx.condicional()) == 1) {
-            for (InstruccionContext instr : ctx.instruccion()) {
-                visit(instr);
-            }
-            if (ctx.incdec() != null) {
-                visit(ctx.incdec());
-            }
-        }
-
-        System.out.println("Se terminó el for");
-        return result;
-    }
-
-    @Override
-    public Object visitCondicional(CondicionalContext ctx) {
-        Object left = visit(ctx.expr(0));
-        Object right = visit(ctx.expr(1));
-
-        if (!(left instanceof Integer) || !(right instanceof Integer)) {
-            throw new RuntimeException("Condicionales solo soportan enteros por ahora");
-        }
-
-        int l = (Integer) left;
-        int r = (Integer) right;
-
-        if (ctx.MAYOR() != null) return l > r ? 1 : 0;
-        if (ctx.MENOR() != null) return l < r ? 1 : 0;
-        if (ctx.MAYORIGUAL() != null) return l >= r ? 1 : 0;
-        if (ctx.MENORIGUAL() != null) return l <= r ? 1 : 0;
-        if (ctx.IGUAL() != null) return l == r ? 1 : 0;
-        if (ctx.DIFERENTE() != null) return l != r ? 1 : 0;
-        if (ctx.AND() != null) return (l == 1 && r == 1) ? 1 : 0;
-        if (ctx.OR() != null) return (l == 1 || r == 1) ? 1 : 0;
-        return 0;
-    }
-
-    @Override
-    public Object visitExpr(ExprContext ctx) {
-        Object result = visit(ctx.termino(0));
-        for (int i = 1; i < ctx.termino().size(); i++) {
-            Object right = visit(ctx.termino(i));
-
-            if (result instanceof Integer && right instanceof Integer) {
-                if (ctx.OP_SUMA(i - 1) != null) {
-                    result = (Integer) result + (Integer) right;
-                } else if (ctx.OP_RESTA(i - 1) != null) {
-                    result = (Integer) result - (Integer) right;
-                }
-            } else if (result instanceof String || right instanceof String) {
-                if (ctx.OP_SUMA(i - 1) != null) {
-                    result = String.valueOf(result) + String.valueOf(right);
-                } else {
-                    throw new RuntimeException("Solo se permite suma (concatenación) entre strings");
-                }
-            } else {
-                throw new RuntimeException("Tipos incompatibles en expresión");
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Object visitTermino(TerminoContext ctx) {
-        Object result = visit(ctx.factor(0));
-        for (int i = 1; i < ctx.factor().size(); i++) {
-            Object right = visit(ctx.factor(i));
-
-            if (result instanceof Integer && right instanceof Integer) {
-                if (ctx.OP_MULT(i - 1) != null) {
-                    result = (Integer) result * (Integer) right;
-                } else if (ctx.OP_DIV(i - 1) != null) {
-                    result = (Integer) result / (Integer) right;
-                }
-            } else {
-                throw new RuntimeException("Solo se permiten operaciones aritméticas entre enteros");
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Object visitFactor(FactorContext ctx) {
-        if (ctx.NUM() != null) {
-            return Integer.parseInt(ctx.NUM().getText());
-        } else if (ctx.STRING_LITERAL() != null) {
-            String raw = ctx.STRING_LITERAL().getText();
-            return raw.substring(1, raw.length() - 1); // quitar comillas
-        } else if (ctx.ID() != null) {
-            String id = ctx.ID().getText();
-            if (tablaSimbolos.containsKey(id)) {
-                return tablaSimbolos.get(id);
-            } else {
-                System.out.println("Error: Variable " + id + " no declarada");
-                return null;
-            }
+        if(ctx.expr() != null){
+            valor = visit(ctx.expr());
+        } else if(ctx.condicional() != null){
+            valor = visit(ctx.condicional());
         } else {
+            throw new RuntimeException("Error: Asignación inválida. (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        Variable varDeclarada = tablaSimbolos.get(id);
+
+        if (varDeclarada == null) {
+            throw new RuntimeException("Error: Variable " + id + " no declarada. (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        if (varDeclarada.tipo != valor.tipo) {
+            throw new RuntimeException("Error: No se puede asignar " + valor.tipo + " a " + varDeclarada.tipo +". (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        System.out.println("Se asignó "+ id + " = " + valor);
+
+        tablaSimbolos.put(id, valor);
+        return valor;
+    }
+
+    @Override
+    public Variable visitCondicional(CondicionalContext ctx) {
+        Variable exp1 = visit(ctx.expr(0));
+        Variable exp2 = visit(ctx.expr(1));
+        String operador = ctx.opComparacion().getText();
+
+        if(exp1.tipo != exp2.tipo){
+            throw new RuntimeException("Error: Tipos incompatibles en comparación: " + exp1.tipo + " y " + exp2.tipo +". (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        boolean result;
+        switch (operador) {
+            case ">":
+                if(exp1.tipo == Variable.Tipo.INT){
+                    result = (Integer) exp1.valor > (Integer) exp2.valor ? true : false;
+                } else if(exp1.tipo == Variable.Tipo.FLOAT){
+                    result = (Float) exp1.valor > (Float) exp2.valor ? true : false;
+                } else {
+                    throw new RuntimeException("Error: El operador > no es compatible con " + exp1.tipo + ". (Line:"+ctx.getStart().getLine()+")");
+                }
+                break;
+            case "<":
+                if(exp1.tipo == Variable.Tipo.INT){
+                    result = (Integer) exp1.valor < (Integer) exp2.valor ? true : false;
+                } else if(exp1.tipo == Variable.Tipo.FLOAT){
+                    result = (Float) exp1.valor < (Float) exp2.valor ? true : false;
+                } else {
+                    throw new RuntimeException("Error: El operador < no es compatible con " + exp1.tipo + ". (Line:"+ctx.getStart().getLine()+")");
+                }
+                break;
+            case "==":
+                result = exp1.valor.equals(exp2.valor);
+                break;
+            default:
+                throw new RuntimeException("Error: Operador desconocido: " + operador +". (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        return new Variable(Variable.Tipo.BOOLEAN, result);
+    }
+
+    @Override
+    public Variable visitIfInstr(LanguageParser.IfInstrContext ctx) {
+        Variable condResult = visit(ctx.condicional(0));  // Evalúa la condición del if
+
+        if (condResult.tipo != Variable.Tipo.BOOLEAN) {
+            throw new RuntimeException("Error: La condición del if debe ser de tipo booleano. (Line:"+ctx.getStart().getLine()+")");
+        }
+
+        if (ctx.IF() != null && (boolean) condResult.valor) {
+            System.out.println("Entro al if");
+            visit(ctx.ifbody());
+        } else {
+            boolean elseifEjecutado = false;
+            for (int i = 0; i < ctx.ELSEIF().size(); i++) {
+                Variable elseifCondResult = visit(ctx.condicional(i + 1));  // Evalúa el elseif correspondiente
+
+                if (elseifCondResult.tipo != Variable.Tipo.BOOLEAN) {
+                    throw new RuntimeException("Error: La condición del elseif debe ser de tipo booleano. (Line:"+ctx.getStart().getLine()+")");
+                }
+
+                if ((boolean) elseifCondResult.valor) {
+                    System.out.println("Entro al elseif");
+                    visit(ctx.elseifbody(i));
+                    elseifEjecutado = true;
+                    break; // Evita que siga evaluando más elseif
+                }
+            }
+            if (!elseifEjecutado && ctx.ELSE() != null) {
+                System.out.println("Entro al else");
+                visit(ctx.elsebody());
+            }
+        }
+
+        return new Variable(Variable.Tipo.BOOLEAN, true);
+    }
+
+    @Override
+    public Variable visitForInstr(ForInstrContext ctx) {
+        // Evaluar la inicialización (int i = 0)
+        visit(ctx.declaracion());
+        System.out.println("Entro al for");
+        // Extraer la condición
+        // Condición y actualización
+        while ((boolean) visit(ctx.condicional()).valor) {
+            visit(ctx.forBody());
+
+            // Validar si hay expresión de actualización
+            if (ctx.expr() != null) {
+                visit(ctx.expr());
+            }
+        }
+        return null;
+
+    }
+
+    @Override
+    public Variable visitElsebody(ElsebodyContext ctx) {
+        for(InstruccionContext intr: ctx.instruccion()){
+            visit(intr);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Variable visitIfbody(IfbodyContext ctx) {
+        for(InstruccionContext intr: ctx.instruccion()){
+            visit(intr);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Variable visitElseifbody(ElseifbodyContext ctx) {
+        for(InstruccionContext intr: ctx.instruccion()){
+            visit(intr);
+        }
+
+        return null;
+    }
+
+
+    @Override
+    public Variable visitForBody(ForBodyContext ctx) {
+        for(InstruccionContext intr: ctx.instruccion()){
+            visit(intr);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Variable visitExpr(ExprContext ctx) {
+        Variable result = visit(ctx.termino(0));
+        for(int i=1;i<ctx.termino().size();i++){
+            Variable sigTermino = visit(ctx.termino(i));
+
+            if (result.tipo != sigTermino.tipo){
+                throw new RuntimeException("Error: Tipos incompatibles entre terminos en expresión aritmética. (Line:"+ctx.getStart().getLine()+")");
+            }
+
+            if (sigTermino.tipo == Variable.Tipo.STRING) {
+                String resultado = String.valueOf(result.valor);
+                String sigOperando = String.valueOf(sigTermino.valor);
+                result = new Variable(Variable.Tipo.STRING,  resultado + sigOperando);
+            } else if(result.tipo == Variable.Tipo.INT){
+                int resultado = (Integer) result.valor;
+                int sigOperando = (Integer) sigTermino.valor;
+                if(ctx.OP_SUMA(i-1) != null){
+                    result = new Variable(Variable.Tipo.INT, resultado + sigOperando);
+                } else if(ctx.OP_RESTA(i-1) != null){
+                    result = new Variable(Variable.Tipo.INT, resultado - sigOperando);
+                }
+            } else if(result.tipo == Variable.Tipo.FLOAT){
+                float resultado = (Float) result.valor;
+                float sigOperando = (Float) sigTermino.valor;
+                if(ctx.OP_SUMA(i-1) != null){
+                    result = new Variable(Variable.Tipo.FLOAT, resultado + sigOperando);
+                } else if(ctx.OP_RESTA(i-1) != null){
+                    result = new Variable(Variable.Tipo.FLOAT, resultado - sigOperando);
+                }
+            } else {
+                throw new RuntimeException("Error: Tipo no soportado para operaciones aritméticas entre terminos: " + result.tipo +". (Line:"+ctx.getStart().getLine()+")");
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Variable visitTermino(TerminoContext ctx) {
+        Variable result = visit(ctx.factor(0));
+        for(int i=1;i<ctx.factor().size();i++){
+            Variable sigFactor = visit(ctx.factor(i));
+
+            if(result.tipo != sigFactor.tipo){
+                throw new RuntimeException("Error: Tipos incompatibles entre factores en expresión aritmética. (Line:"+ctx.getStart().getLine()+")");
+            }
+
+            if(result.tipo == Variable.Tipo.INT){
+                if(ctx.OP_MULT(i-1) != null){
+                    int resultado = (Integer) result.valor;
+                    int sigOperando = (Integer) sigFactor.valor;
+                    result = new Variable(Variable.Tipo.INT, resultado * sigOperando);
+                } else if(ctx.OP_DIV(i-1) != null){
+                    int resultado = (Integer) result.valor;
+                    int sigOperando = (Integer) sigFactor.valor;
+
+                    if(sigOperando == 0){
+                        throw new RuntimeException("Error: División por Cero no soportado. (Line:"+ctx.getStart().getLine()+")");
+                    }
+
+                    result = new Variable(Variable.Tipo.INT, resultado / sigOperando);
+                } else {
+                    throw new RuntimeException("Error: Tipo no soportado para operaciones aritméticas entre factores: " + result.tipo + ". (Line:"+ctx.getStart().getLine()+")");
+                }
+
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Variable visitFactor(FactorContext ctx) {
+        if (ctx.FLOAT() != null) {
+            return new Variable(Variable.Tipo.FLOAT, Float.parseFloat(ctx.FLOAT().getText()));
+        } else if (ctx.NUM() != null) {
+            return new Variable(Variable.Tipo.INT, Integer.parseInt(ctx.NUM().getText()));
+        } else if (ctx.LITERAL() != null) {
+            String texto = ctx.LITERAL().getText();
+            // Quitar comillas
+            texto = texto.substring(1, texto.length() - 1);
+            return new Variable(Variable.Tipo.STRING, texto);
+        } else if (ctx.BOOL() != null) {
+            return new Variable(Variable.Tipo.BOOLEAN, Boolean.parseBoolean(ctx.BOOL().getText()));
+        } else if (ctx.ID() != null && ctx.OP_INCREMENTO() != null) {
+            // Operación tipo: i++
+            String id = ctx.ID().getText();
+            Variable valorActual = tablaSimbolos.get(id);
+
+            if (valorActual == null){
+                throw new RuntimeException("Error: Variable '" + id + "' no declarada. (Line:"+ctx.getStart().getLine()+")");
+            }
+
+            if(valorActual.tipo != Variable.Tipo.INT && valorActual.tipo != Variable.Tipo.FLOAT){
+                throw new RuntimeException("Error: El operador ++ solo es válido para valores Enteros o Flotantes. (Line:"+ctx.getStart().getLine()+")");
+            }
+
+            Object valorAnterior = valorActual.valor;
+
+            // Se incrementa
+            if(valorActual.tipo == Variable.Tipo.INT){
+                valorActual.valor = (Integer) valorActual.valor + 1;
+            } else {
+                valorActual.valor = (Float) valorActual.valor + 1.0f;
+            }
+
+            // Actualizar en la tabla de simbolos
+            tablaSimbolos.put(id, valorActual);
+                System.out.println("Incremento: " + id + " = " + (valorActual.valor));
+
+            // Retornamos el valor anterior (como post-incremento)
+            return new Variable(valorActual.tipo, valorAnterior);
+        } else if(ctx.ID() != null){
+            // Acceder a una variable existente
+            String id = ctx.ID().getText();
+            Variable variable = tablaSimbolos.get(id);
+            if (variable == null){
+                throw new RuntimeException("Error: Variable '" + id + "' no declarada. (Line:"+ctx.getStart().getLine()+")");
+            }
+            if (variable.valor == null) {
+                throw new RuntimeException("Error: La variable '" + id + "' fue declarada pero no inicializada. (Line:"+ctx.getStart().getLine()+")");
+            }
+            return variable;
+        } else if(ctx.expr() != null){
             return visit(ctx.expr());
         }
+
+         // Default en caso de error
+        throw new RuntimeException("Error: Factor inválido. (Line:"+ctx.getStart().getLine()+")");
     }
 }

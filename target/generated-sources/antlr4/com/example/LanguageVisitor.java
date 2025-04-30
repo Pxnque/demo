@@ -1,8 +1,5 @@
-// Generated from com/example/Language.g4 by ANTLR 4.9.2
+// Generated from com\example\Language.g4 by ANTLR 4.9.2
 package com.example;
-
-import java.util.HashMap;
-
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -20,35 +17,110 @@ public interface LanguageVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProgram(LanguageParser.ProgramContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#instruccion}.
+	 * Visit a parse tree produced by the {@code instruccionDeclaracion}
+	 * labeled alternative in {@link LanguageParser#instruccion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInstruccion(LanguageParser.InstruccionContext ctx);
+	T visitInstruccionDeclaracion(LanguageParser.InstruccionDeclaracionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#print}.
+	 * Visit a parse tree produced by the {@code instruccionAsignacion}
+	 * labeled alternative in {@link LanguageParser#instruccion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPrint(LanguageParser.PrintContext ctx);
+	T visitInstruccionAsignacion(LanguageParser.InstruccionAsignacionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#declaracion}.
+	 * Visit a parse tree produced by the {@code instruccionExpresion}
+	 * labeled alternative in {@link LanguageParser#instruccion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitDeclaracion(LanguageParser.DeclaracionContext ctx);
+	T visitInstruccionExpresion(LanguageParser.InstruccionExpresionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#incdec}.
+	 * Visit a parse tree produced by the {@code instruccionCondicional}
+	 * labeled alternative in {@link LanguageParser#instruccion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIncdec(LanguageParser.IncdecContext ctx);
+	T visitInstruccionCondicional(LanguageParser.InstruccionCondicionalContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#ifdecla}.
+	 * Visit a parse tree produced by the {@code instruccionIf}
+	 * labeled alternative in {@link LanguageParser#instruccion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitIfdecla(LanguageParser.IfdeclaContext ctx);
+	T visitInstruccionIf(LanguageParser.InstruccionIfContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code instruccionFor}
+	 * labeled alternative in {@link LanguageParser#instruccion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstruccionFor(LanguageParser.InstruccionForContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code declaracionSimple}
+	 * labeled alternative in {@link LanguageParser#declaracion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaracionSimple(LanguageParser.DeclaracionSimpleContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code declaracionConAsignacion}
+	 * labeled alternative in {@link LanguageParser#declaracion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaracionConAsignacion(LanguageParser.DeclaracionConAsignacionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code declaracionConAsignacionCond}
+	 * labeled alternative in {@link LanguageParser#declaracion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclaracionConAsignacionCond(LanguageParser.DeclaracionConAsignacionCondContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#asig}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAsig(LanguageParser.AsigContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#ifInstr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfInstr(LanguageParser.IfInstrContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#ifbody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIfbody(LanguageParser.IfbodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#elseifbody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElseifbody(LanguageParser.ElseifbodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#elsebody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitElsebody(LanguageParser.ElsebodyContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#forInstr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForInstr(LanguageParser.ForInstrContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#forBody}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitForBody(LanguageParser.ForBodyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link LanguageParser#condicional}.
 	 * @param ctx the parse tree
@@ -56,11 +128,11 @@ public interface LanguageVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCondicional(LanguageParser.CondicionalContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#fordecla}.
+	 * Visit a parse tree produced by {@link LanguageParser#opComparacion}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFordecla(LanguageParser.FordeclaContext ctx);
+	T visitOpComparacion(LanguageParser.OpComparacionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link LanguageParser#expr}.
 	 * @param ctx the parse tree
@@ -74,9 +146,52 @@ public interface LanguageVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTermino(LanguageParser.TerminoContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link LanguageParser#factor}.
+	 * Visit a parse tree produced by the {@code factorNumero}
+	 * labeled alternative in {@link LanguageParser#factor}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFactor(LanguageParser.FactorContext ctx);
+	T visitFactorNumero(LanguageParser.FactorNumeroContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code factorFloat}
+	 * labeled alternative in {@link LanguageParser#factor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactorFloat(LanguageParser.FactorFloatContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code factorTexto}
+	 * labeled alternative in {@link LanguageParser#factor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactorTexto(LanguageParser.FactorTextoContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code factorBooleano}
+	 * labeled alternative in {@link LanguageParser#factor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactorBooleano(LanguageParser.FactorBooleanoContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code factorIncremento}
+	 * labeled alternative in {@link LanguageParser#factor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactorIncremento(LanguageParser.FactorIncrementoContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code factorId}
+	 * labeled alternative in {@link LanguageParser#factor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactorId(LanguageParser.FactorIdContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code factorParentesis}
+	 * labeled alternative in {@link LanguageParser#factor}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFactorParentesis(LanguageParser.FactorParentesisContext ctx);
 }
