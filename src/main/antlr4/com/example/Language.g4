@@ -124,11 +124,11 @@ factor:
     }
 	| LPAREN expr RPAREN;
 
-OP_SUMA: '+';
-OP_RESTA: '-';
-OP_MULT: '*';
-OP_DIV: '/';
-OP_ASIGN: '=';
+OP_SUMA: 'pony+';
+OP_RESTA: 'pony-';
+OP_MULT: 'pony*';
+OP_DIV: 'pony/';
+OP_ASIGN: 'pony=';
 SEMI: ';';
 LPAREN: '(';
 RPAREN: ')';
@@ -146,16 +146,16 @@ IF: 'if';
 ELSE: 'else';
 ELSEIF: 'else if';
 FOR: 'for';
-INT: 'int';
-FLOAT: 'float';
-BOOL: 'bool';
-STRING: 'string';
-CHAR: 'char';
+INT: 'ponyint';
+FLOAT: 'ponyfloat';
+BOOL: 'ponybool';
+STRING: 'ponystring';
+CHAR: 'ponychar';
 INC: '++';
 DEC: '--';
-PRINT: 'print';
-TRUE: 'true';
-FALSE: 'false';
+PRINT: 'ponyprint';
+TRUE: 'ponytrue';
+FALSE: 'ponyfalse';
 
 // Definimos los números de manera que permita enteros y flotantes
 FLOAT_NUM: [0-9]+ '.' [0-9]+;

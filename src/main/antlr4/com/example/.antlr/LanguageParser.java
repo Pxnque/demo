@@ -38,10 +38,11 @@ public class LanguageParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'+'", "'-'", "'*'", "'/'", "'='", "';'", "'('", "')'", "'>'", 
-			"'<'", "'>='", "'<='", "'=='", "'!='", "'||'", "'&&'", "'{'", "'}'", 
-			"'if'", "'else'", "'else if'", "'for'", "'int'", "'float'", "'bool'", 
-			"'string'", "'char'", "'++'", "'--'", "'print'", "'true'", "'false'"
+			null, "'pony+'", "'pony-'", "'pony*'", "'pony/'", "'pony='", "';'", "'('", 
+			"')'", "'>'", "'<'", "'>='", "'<='", "'=='", "'!='", "'||'", "'&&'", 
+			"'{'", "'}'", "'if'", "'else'", "'else if'", "'for'", "'ponyint'", "'ponyfloat'", 
+			"'ponybool'", "'ponystring'", "'ponychar'", "'++'", "'--'", "'ponyprint'", 
+			"'ponytrue'", "'ponyfalse'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
