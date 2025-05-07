@@ -18,14 +18,55 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitIfdecla(IfdeclaContext ctx) {
+    public Object visitIfdecla(LanguageParser.IfdeclaContext ctx) {
         Object result = null;
-        if (ctx.condicional() != null) {
-            System.out.println("Condicion: ");
-            for (InstruccionContext instr : ctx.instruccion()) {
-                result = visit(instr);
+
+        int instruccionIndex = 0;
+
+        // IF principal
+        if (evaluarCondicion(visit(ctx.condicional(0)))) {
+            int ifInstrCount = ctx.instruccion().size() - ctx.ELSEIF().size() - (ctx.ELSE() != null ? 1 : 0);
+            for (int i = 0; i < ifInstrCount; i++) {
+                visit(ctx.instruccion(instruccionIndex++));
+            }
+            return result;
+        }
+
+        // ELSE IF (si hay)
+        for (int i = 0; i < ctx.ELSEIF().size(); i++) {
+            System.out.println("Entró a un elseif");
+            if (evaluarCondicion(visit(ctx.condicional(i + 1)))) {
+                System.out.println("Entró a un elseif verdadero");
+                int elseifInstrCount = 1; // Asume una instrucción por bloque, o ajusta según necesidad
+                for (int j = 0; j < elseifInstrCount; j++) {
+                    visit(ctx.instruccion(instruccionIndex++));
+                }
+                return result;
+            } else {
+                // Aunque no se ejecuten, se deben saltar esas instrucciones en el índice
+                instruccionIndex++; // Asume 1 instrucción por bloque
             }
         }
+
+        // ELSE (si hay)
+        if (ctx.ELSE() != null) {
+            while (instruccionIndex < ctx.instruccion().size()) {
+                visit(ctx.instruccion(instruccionIndex++));
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public Object visitWhiledecla(WhiledeclaContext ctx) {
+        Object result = null;
+        while (evaluarCondicion(visit(ctx.condicional()))) {
+            for (InstruccionContext instr : ctx.instruccion()) {
+                visit(instr);
+            }
+        }
+        System.out.println("Se terminó el while");
         return result;
     }
 
@@ -54,15 +95,15 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
             } else {
                 // Valores por defecto según el tipo
                 String tipo = ctx.declaracion().tipo.getText();
-                if (tipo.equals("int")) {
+                if (tipo.equals("num")) {
                     tablaSimbolos.put(varName, 0);
-                } else if (tipo.equals("float")) {
+                } else if (tipo.equals("dec")) {
                     tablaSimbolos.put(varName, 0.0f);
-                } else if (tipo.equals("bool")) {
+                } else if (tipo.equals("bin")) {
                     tablaSimbolos.put(varName, false);
-                } else if (tipo.equals("string")) {
+                } else if (tipo.equals("txt")) {
                     tablaSimbolos.put(varName, "");
-                } else if (tipo.equals("char")) {
+                } else if (tipo.equals("ch")) {
                     tablaSimbolos.put(varName, '\0');
                 }
             }
@@ -73,6 +114,9 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         } else if (ctx.fordecla() != null) {
             System.out.println("Llegó a la línea de un For: ");
             return visit(ctx.fordecla());
+        } else if (ctx.whiledecla() != null) {
+            System.out.println("Llegó a la línea de un While: ");
+            return visit(ctx.whiledecla());
         } else if (ctx.incdec() != null) {
             return visit(ctx.incdec());
         } else if (ctx.print() != null) {
@@ -98,7 +142,7 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
             System.out.println("Error: Variable " + id + " no declarada");
             return null;
         }
-        
+
         Object value = tablaSimbolos.get(id);
         if (value instanceof Integer) {
             Integer intVal = (Integer) value;
@@ -169,41 +213,55 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         if ((left instanceof Number) && (right instanceof Number)) {
             double l = ((Number) left).doubleValue();
             double r = ((Number) right).doubleValue();
-            
-            if (ctx.MAYOR() != null) return l > r ? 1 : 0;
-            if (ctx.MENOR() != null) return l < r ? 1 : 0;
-            if (ctx.MAYORIGUAL() != null) return l >= r ? 1 : 0;
-            if (ctx.MENORIGUAL() != null) return l <= r ? 1 : 0;
-            if (ctx.IGUAL() != null) return l == r ? 1 : 0;
-            if (ctx.DIFERENTE() != null) return l != r ? 1 : 0;
+
+            if (ctx.MAYOR() != null)
+                return l > r ? 1 : 0;
+            if (ctx.MENOR() != null)
+                return l < r ? 1 : 0;
+            if (ctx.MAYORIGUAL() != null)
+                return l >= r ? 1 : 0;
+            if (ctx.MENORIGUAL() != null)
+                return l <= r ? 1 : 0;
+            if (ctx.IGUAL() != null)
+                return l == r ? 1 : 0;
+            if (ctx.DIFERENTE() != null)
+                return l != r ? 1 : 0;
         }
         // Para tipos booleanos
         else if ((left instanceof Boolean) && (right instanceof Boolean)) {
             boolean l = (Boolean) left;
             boolean r = (Boolean) right;
-            
-            if (ctx.IGUAL() != null) return l == r ? 1 : 0;
-            if (ctx.DIFERENTE() != null) return l != r ? 1 : 0;
-            if (ctx.AND() != null) return (l && r) ? 1 : 0;
-            if (ctx.OR() != null) return (l || r) ? 1 : 0;
+
+            if (ctx.IGUAL() != null)
+                return l == r ? 1 : 0;
+            if (ctx.DIFERENTE() != null)
+                return l != r ? 1 : 0;
+            if (ctx.AND() != null)
+                return (l && r) ? 1 : 0;
+            if (ctx.OR() != null)
+                return (l || r) ? 1 : 0;
         }
         // Para comparación de strings
         else if ((left instanceof String) && (right instanceof String)) {
             String l = (String) left;
             String r = (String) right;
-            
-            if (ctx.IGUAL() != null) return l.equals(r) ? 1 : 0;
-            if (ctx.DIFERENTE() != null) return !l.equals(r) ? 1 : 0;
+
+            if (ctx.IGUAL() != null)
+                return l.equals(r) ? 1 : 0;
+            if (ctx.DIFERENTE() != null)
+                return !l.equals(r) ? 1 : 0;
         }
         // Operadores lógicos cuando left y right son valores condicionales (0 o 1)
         else if (left instanceof Integer && right instanceof Integer) {
             boolean l = ((Integer) left) == 1;
             boolean r = ((Integer) right) == 1;
-            
-            if (ctx.AND() != null) return (l && r) ? 1 : 0;
-            if (ctx.OR() != null) return (l || r) ? 1 : 0;
+
+            if (ctx.AND() != null)
+                return (l && r) ? 1 : 0;
+            if (ctx.OR() != null)
+                return (l || r) ? 1 : 0;
         }
-        
+
         throw new RuntimeException("Tipos incompatibles en condicional: " + left.getClass() + " y " + right.getClass());
     }
 
@@ -221,11 +279,9 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
                 }
             } else if ((result instanceof Float) || (right instanceof Float)) {
                 // Convertir a float si alguno es float
-                float leftVal = (result instanceof Integer) ? 
-                                ((Integer) result).floatValue() : (Float) result;
-                float rightVal = (right instanceof Integer) ? 
-                                ((Integer) right).floatValue() : (Float) right;
-                
+                float leftVal = (result instanceof Integer) ? ((Integer) result).floatValue() : (Float) result;
+                float rightVal = (right instanceof Integer) ? ((Integer) right).floatValue() : (Float) right;
+
                 if (ctx.OP_SUMA(i - 1) != null) {
                     result = leftVal + rightVal;
                 } else if (ctx.OP_RESTA(i - 1) != null) {
@@ -261,11 +317,9 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
                 }
             } else if ((result instanceof Float) || (right instanceof Float)) {
                 // Convertir a float si alguno es float
-                float leftVal = (result instanceof Integer) ? 
-                                ((Integer) result).floatValue() : (Float) result;
-                float rightVal = (right instanceof Integer) ? 
-                                ((Integer) right).floatValue() : (Float) right;
-                
+                float leftVal = (result instanceof Integer) ? ((Integer) result).floatValue() : (Float) result;
+                float rightVal = (right instanceof Integer) ? ((Integer) right).floatValue() : (Float) right;
+
                 if (ctx.OP_MULT(i - 1) != null) {
                     result = leftVal * rightVal;
                 } else if (ctx.OP_DIV(i - 1) != null) {
@@ -294,6 +348,9 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
         } else if (ctx.STRING_LITERAL() != null) {
             String raw = ctx.STRING_LITERAL().getText();
             return raw.substring(1, raw.length() - 1); // quitar comillas
+        } else if (ctx.CHAR_LITERAL() != null) {
+            String raw = ctx.CHAR_LITERAL().getText();
+            return raw.charAt(1); // quitar comillas
         } else if (ctx.ID() != null) {
             String id = ctx.ID().getText();
             if (tablaSimbolos.containsKey(id)) {

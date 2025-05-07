@@ -1,9 +1,49 @@
-int x = 1
-string s = "mundo"
-print("hola")
-print(s)
-print(x)
-float z = 6.6
-bool y = false
-print(y)
+num count => 15 :0x
+dec ratio => 2.5 :0x
+bin flag => ye :0x
+txt message => "Custom language active" :0x
+ch grade => 'A' :0x
 
+say[[ message ]] :0x
+
+@grok is this true? [[ flag <-> ye ]]
+<<
+    say[[ "Flag is true" ]] :0x
+    count => count ~> 1 :0x
+>>
+
+ratio => ratio $e 1.5 :0x
+say[[ "Ratio updated" ]] :0x
+
+flag => nope :0x
+message => "Flag turned off" :0x
+say[[ message ]] :0x
+
+count i+ :0x
+say[[ count ]] :0x
+count d- :0x
+say[[ count ]] :0x
+
+loop [[ num c => 0 :0x c vv: 10 :0x c i+]]
+<<
+    say[[ "Looping..." ]] :0x
+    c => c $e 1 :0x
+    say[[ c ]] :0x
+>>
+
+num total => 2 :0x
+total => total . 4 :0x
+say[[total]] :0x
+total => total #> 2 :0x
+
+@grok is this true? [[ total vv 0 ]]
+<<
+     say[[ "All checks passed" ]] :0x
+>>
+
+num w => 0 :0x
+on [[ w vv 10 ]]
+<<
+    w => w $e 1 :0x
+    say[[w]] :0x
+>>

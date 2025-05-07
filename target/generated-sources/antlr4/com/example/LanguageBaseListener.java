@@ -1,4 +1,4 @@
-// Generated from com\example\Language.g4 by ANTLR 4.9.2
+// Generated from com/example/Language.g4 by ANTLR 4.9.2
 package com.example;
 
 import java.util.HashMap;
@@ -110,6 +110,18 @@ public class LanguageBaseListener implements LanguageListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitFordecla(LanguageParser.FordeclaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhiledecla(LanguageParser.WhiledeclaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhiledecla(LanguageParser.WhiledeclaContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

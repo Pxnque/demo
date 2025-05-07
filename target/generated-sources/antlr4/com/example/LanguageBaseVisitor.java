@@ -1,4 +1,4 @@
-// Generated from com\example\Language.g4 by ANTLR 4.9.2
+// Generated from com/example/Language.g4 by ANTLR 4.9.2
 package com.example;
 
 import java.util.HashMap;
@@ -70,6 +70,13 @@ public class LanguageBaseVisitor<T> extends AbstractParseTreeVisitor<T> implemen
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitFordecla(LanguageParser.FordeclaContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitWhiledecla(LanguageParser.WhiledeclaContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

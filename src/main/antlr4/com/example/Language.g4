@@ -16,20 +16,20 @@ import java.util.HashMap;
     }
 
     private HashMap<String, VariableInfo> symbolTable = new HashMap<>();
-    
+
     private void checkVariableExists(String varName, Token token) {
         if (!symbolTable.containsKey(varName)) {
             throw new RuntimeException("Variable no declarada '" + varName + "' en línea " + token.getLine());
         }
     }
-    
+
     private void checkVariableInitialized(String varName, Token token) {
         VariableInfo info = symbolTable.get(varName);
         if (info != null && !info.initialized) {
             throw new RuntimeException("Variable no inicializada '" + varName + "' en línea " + token.getLine());
         }
     }
-    
+
     private void checkDivisionByZero(String divisorValue, Token opToken) {
         try {
             if (Integer.parseInt(divisorValue) == 0) {
@@ -44,19 +44,22 @@ import java.util.HashMap;
 program: instruccion+ EOF;
 
 instruccion:
-	ID OP_ASIGN (expr | condicional) {
+	(
+		ID OP_ASIGN (expr | condicional) {
         String varName = $ID.text;
         checkVariableExists(varName, $ID);
         VariableInfo info = symbolTable.get(varName);
         info.initialized = true;
     }
-	| expr
-	| condicional
-	| declaracion
+		| expr
+		| condicional
+		| declaracion
+		| incdec
+		| print
+	) SEMI
 	| ifdecla
 	| fordecla
-	| incdec
-	| print;
+	| whiledecla;
 
 print: PRINT LPAREN (expr) RPAREN;
 
@@ -73,7 +76,7 @@ declaracion:
     };
 
 incdec:
-	ID { 
+	ID {
         checkVariableExists($ID.text, $ID);
         VariableInfo info = symbolTable.get($ID.text);
         checkVariableInitialized($ID.text, $ID);
@@ -99,6 +102,9 @@ condicional:
 fordecla:
 	FOR LPAREN declaracion SEMI condicional SEMI incdec? RPAREN LCURLY instruccion+ RCURLY;
 
+whiledecla:
+	WHILE LPAREN condicional RPAREN LCURLY instruccion+ RCURLY;
+
 expr: termino (OP_SUMA termino)* | termino (OP_RESTA termino)*;
 
 termino:
@@ -115,52 +121,56 @@ termino:
 factor:
 	NUM
 	| FLOAT_NUM
-	| TRUE 
+	| TRUE
 	| FALSE
 	| STRING_LITERAL
-	| ID { 
+	| CHAR_LITERAL
+	| ID {
         checkVariableExists($ID.text, $ID);
-        checkVariableInitialized($ID.text, $ID); 
+        checkVariableInitialized($ID.text, $ID);
     }
 	| LPAREN expr RPAREN;
 
-OP_SUMA: '+';
-OP_RESTA: '-';
-OP_MULT: '*';
-OP_DIV: '/';
-OP_ASIGN: '=';
-SEMI: ';';
-LPAREN: '(';
-RPAREN: ')';
-MAYOR: '>';
-MENOR: '<';
-MAYORIGUAL: '>=';
-MENORIGUAL: '<=';
-IGUAL: '==';
-DIFERENTE: '!=';
-OR: '||';
-AND: '&&';
-LCURLY: '{';
-RCURLY: '}';
-IF: 'if';
-ELSE: 'else';
-ELSEIF: 'else if';
-FOR: 'for';
-INT: 'int';
-FLOAT: 'float';
-BOOL: 'bool';
-STRING: 'string';
-CHAR: 'char';
-INC: '++';
-DEC: '--';
-PRINT: 'print';
-TRUE: 'true';
-FALSE: 'false';
+OP_SUMA: '$e';
+OP_RESTA: '~>';
+OP_MULT: '.';
+OP_DIV: '#>';
+OP_ASIGN: '=>';
+SEMI: ':0x';
+LPAREN: '[[';
+RPAREN: ']]';
+LCURLY: '<<';
+RCURLY: '>>';
+MAYOR: '^^';
+MENOR: 'vv';
+MAYORIGUAL: '^^:';
+MENORIGUAL: 'vv:';
+IGUAL: '<->';
+DIFERENTE: ':?';
+OR: '$';
+AND: '@&';
+INC: 'i+';
+DEC: 'd-';
+
+IF: '@grok is this true?';
+ELSE: 'fallback';
+ELSEIF: 'then?';
+FOR: 'loop';
+WHILE: 'on';
+PRINT: 'say';
+INT: 'num';
+FLOAT: 'dec';
+BOOL: 'bin';
+STRING: 'txt';
+CHAR: 'ch';
+TRUE: 'ye';
+FALSE: 'nope';
 
 // Definimos los números de manera que permita enteros y flotantes
 FLOAT_NUM: [0-9]+ '.' [0-9]+;
 NUM: [0-9]+;
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 STRING_LITERAL: '"' (~["\r\n])* '"';
+CHAR_LITERAL: '\'' (~['\\\r\n] | '\\' .) '\'';
 // ON WORK ++ COMMENT: '//' ~[\r\n]* -> skip;
 WS: [ \t\n\r\f]+ -> skip;

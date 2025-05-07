@@ -1,4 +1,4 @@
-// Generated from com\example\Language.g4 by ANTLR 4.9.2
+// Generated from com/example/Language.g4 by ANTLR 4.9.2
 package com.example;
 
 import java.util.HashMap;
@@ -61,6 +61,12 @@ public interface LanguageVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFordecla(LanguageParser.FordeclaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link LanguageParser#whiledecla}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhiledecla(LanguageParser.WhiledeclaContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link LanguageParser#expr}.
 	 * @param ctx the parse tree

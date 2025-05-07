@@ -1,4 +1,4 @@
-// Generated from com\example\Language.g4 by ANTLR 4.9.2
+// Generated from com/example/Language.g4 by ANTLR 4.9.2
 package com.example;
 
 import java.util.HashMap;
@@ -90,6 +90,16 @@ public interface LanguageListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitFordecla(LanguageParser.FordeclaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link LanguageParser#whiledecla}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhiledecla(LanguageParser.WhiledeclaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link LanguageParser#whiledecla}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhiledecla(LanguageParser.WhiledeclaContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link LanguageParser#expr}.
 	 * @param ctx the parse tree
