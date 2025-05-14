@@ -1,13 +1,17 @@
 package com.example;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 public class Main {
 
-    private static final String EXTENSION = "lang";
+    private static final String EXTENSION = "kys";
     private static final String DIRBASE = "src/test/resources/";
 
     public static void main(String[] args) throws IOException {
@@ -23,6 +27,14 @@ public class Main {
             LanguageParser.ProgramContext tree = parser.program();
             LanguageCustomVisitor visitor = new LanguageCustomVisitor();
             visitor.visit(tree);
+
+            // Traducción a Python
+            LanguageToPythonVisitor pyVisitor = new LanguageToPythonVisitor();
+            String pythonCode = pyVisitor.visit(tree);
+            String outputFile = file.replaceAll("\\.kys$", ".py");
+            Files.write(Paths.get(DIRBASE + outputFile), pythonCode.getBytes(StandardCharsets.UTF_8));
+            System.out.println("Archivo Python generado: " + outputFile);
+
             System.out.println("FINISH: " + file);
         }
     }
