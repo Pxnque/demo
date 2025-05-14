@@ -1,4 +1,4 @@
-// Generated from /home/angeld/MyCode/LangAutoII/demo/src/main/antlr4/com/example/Language.g4 by ANTLR 4.13.1
+// Generated from c:/AutomatasII/primerlenguaje/demo/src/main/antlr4/com/example/Language.g4 by ANTLR 4.13.1
 
 import java.util.HashMap;
 
