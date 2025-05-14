@@ -1,6 +1,6 @@
 package com.example;
 
-public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
+public class LanguageToCSharpVisitor extends LanguageBaseVisitor<String> {
     private final StringBuilder sb = new StringBuilder();
     private int indentLevel = 0;
 
@@ -11,57 +11,90 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
 
     @Override
     public String visitProgram(LanguageParser.ProgramContext ctx) {
+        // Agregar el using y la estructura básica de un programa C#
+        sb.append("using System;\n\n");
+        sb.append("class Program {\n");
+        indentLevel++;
+        appendLine("static void Main(string[] args) {");
+        indentLevel++;
+        
         for (LanguageParser.InstruccionContext var : ctx.instruccion()) {
             String code = visit(var);
             if (code != null && !code.isEmpty()) sb.append(code);
         }
+        
+        indentLevel--;
+        appendLine("}");
+        indentLevel--;
+        sb.append("}\n");
         return sb.toString();
     }
 
     @Override
     public String visitDeclaracion(LanguageParser.DeclaracionContext ctx) {
+        String tipo = mapTipoCSharp(ctx.tipo.getText());
         String varName = ctx.ID().getText();
-        String value = ctx.expr() != null ? visit(ctx.expr()) : "None";
-        appendLine(varName + " = " + value);
+        if (ctx.expr() != null) {
+            String value = visit(ctx.expr());
+            appendLine(tipo + " " + varName + " = " + value + ";");
+        } else {
+            appendLine(tipo + " " + varName + ";");
+        }
         return "";
+    }
+
+    private String mapTipoCSharp(String tipo) {
+        switch (tipo) {
+            case "num": return "int";
+            case "dec": return "float";
+            case "bin": return "bool";
+            case "txt": return "string";
+            case "ch": return "char";
+            default: return tipo;
+        }
     }
 
     @Override
     public String visitIfdecla(LanguageParser.IfdeclaContext ctx) {
-        // Manejo del if principal
-        appendLine("if " + visit(ctx.condicional(0)) + ":");
+        appendLine("if (" + visit(ctx.condicional(0)) + ")");
+        appendLine("{");
         indentLevel++;
-        for (int i = 0; i < ctx.instruccion(0).getChildCount()-1; i++) {
-            visit(ctx.instruccion(0));
-        }
+        visit(ctx.instruccion(0));
         indentLevel--;
+        appendLine("}");
 
-        // Manejo de elif
+        // Manejo de elif (en C# es else if)
         for (int i = 0; i < ctx.ELSEIF().size(); i++) {
-            appendLine("elif " + visit(ctx.condicional(i + 1)) + ":");
+            appendLine("else if (" + visit(ctx.condicional(i + 1)) + ")");
+            appendLine("{");
             indentLevel++;
             visit(ctx.instruccion(i + 1));
             indentLevel--;
+            appendLine("}");
         }
 
         // Manejo del else
         if (ctx.ELSE() != null) {
-            appendLine("else:");
+            appendLine("else");
+            appendLine("{");
             indentLevel++;
             visit(ctx.instruccion(ctx.instruccion().size() - 1));
             indentLevel--;
+            appendLine("}");
         }
         return "";
     }
 
     @Override
     public String visitWhiledecla(LanguageParser.WhiledeclaContext ctx) {
-        appendLine("while " + visit(ctx.condicional()) + ":");
+        appendLine("while (" + visit(ctx.condicional()) + ")");
+        appendLine("{");
         indentLevel++;
         for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
             visit(instr);
         }
         indentLevel--;
+        appendLine("}");
         return "";
     }
 
@@ -71,13 +104,15 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
         String cond = visit(ctx.condicional());
         String inc = ctx.incdec() != null ? visit(ctx.incdec()) : "";
         
-        // Convertir a formato de for de Python
-        appendLine("for " + ctx.declaracion().ID().getText() + " in range(" + cond + "):");
+        appendLine("for (" + init.trim() + " " + cond + "; " + 
+                  ctx.declaracion().ID().getText() + "++)");
+        appendLine("{");
         indentLevel++;
         for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
             visit(instr);
         }
         indentLevel--;
+        appendLine("}");
         return "";
     }
 
@@ -93,8 +128,8 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
         else if (ctx.MENORIGUAL() != null) op = "<=";
         else if (ctx.IGUAL() != null) op = "==";
         else if (ctx.DIFERENTE() != null) op = "!=";
-        else if (ctx.OR() != null) op = "or";
-        else if (ctx.AND() != null) op = "and";
+        else if (ctx.OR() != null) op = "||";
+        else if (ctx.AND() != null) op = "&&";
 
         return left + " " + op + " " + right;
     }
@@ -119,12 +154,12 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
         return result;
     }
 
-    @Override 
+    @Override
     public String visitFactor(LanguageParser.FactorContext ctx) {
         if (ctx.NUM() != null) return ctx.NUM().getText();
-        if (ctx.FLOAT_NUM() != null) return ctx.FLOAT_NUM().getText();
-        if (ctx.TRUE() != null) return "True";
-        if (ctx.FALSE() != null) return "False";
+        if (ctx.FLOAT_NUM() != null) return ctx.FLOAT_NUM().getText() + "f";
+        if (ctx.TRUE() != null) return "true";
+        if (ctx.FALSE() != null) return "false";
         if (ctx.STRING_LITERAL() != null) return ctx.STRING_LITERAL().getText();
         if (ctx.CHAR_LITERAL() != null) return ctx.CHAR_LITERAL().getText();
         if (ctx.ID() != null) return ctx.ID().getText();
@@ -135,7 +170,7 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
     @Override
     public String visitPrint(LanguageParser.PrintContext ctx) {
         String expr = visit(ctx.expr());
-        appendLine("print(" + expr + ")");
+        appendLine("Console.WriteLine(" + expr + ");");
         return "";
     }
 
@@ -143,9 +178,9 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
     public String visitIncdec(LanguageParser.IncdecContext ctx) {
         String id = ctx.ID().getText();
         if (ctx.INC() != null) {
-            appendLine(id + " += 1");
+            appendLine(id + "++;");
         } else if (ctx.DEC() != null) {
-            appendLine(id + " -= 1");
+            appendLine(id + "--;");
         }
         return "";
     }

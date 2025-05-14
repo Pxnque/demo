@@ -35,6 +35,12 @@ public class Main {
             Files.write(Paths.get(DIRBASE + outputFile), pythonCode.getBytes(StandardCharsets.UTF_8));
             System.out.println("Archivo Python generado: " + outputFile);
 
+            LanguageToCSharpVisitor csharpVisitor = new LanguageToCSharpVisitor();
+            String csharpCode = csharpVisitor.visit(tree);
+            String outputFileCSharp = file.replaceAll("\\.kys$", ".cs");
+            Files.write(Paths.get(DIRBASE + outputFileCSharp), csharpCode.getBytes(StandardCharsets.UTF_8));
+            System.out.println("Archivo C# generado: " + outputFileCSharp);
+
             System.out.println("FINISH: " + file);
         }
     }
