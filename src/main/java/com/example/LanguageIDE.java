@@ -13,7 +13,7 @@ public class LanguageIDE extends JFrame {
 
   private JTextArea inputArea;
   private JTextArea outputArea;
-  private JButton runButton;
+  private JButton runButton,runButtonPy, runButtonCSharp;
 
   public LanguageIDE() {
     setTitle("Lenguaje Custom IDE");
@@ -34,6 +34,12 @@ public class LanguageIDE extends JFrame {
 
     runButton = new JButton("Ejecutar");
     runButton.addActionListener(e -> ejecutarCodigo());
+    runButtonPy = new JButton("Convertir a .py");
+    runButtonPy.addActionListener(e -> convertirAPython());
+
+    // runButton.addActionListener(e -> ejecutarConvertirPy());
+    runButtonCSharp = new JButton("Convertir a .c#");
+    runButtonCSharp.addActionListener(e -> convertirACSharp());
 
     JScrollPane inputScroll = new JScrollPane(inputArea);
     inputScroll.setBorder(BorderFactory.createTitledBorder("Código fuente"));
@@ -44,6 +50,8 @@ public class LanguageIDE extends JFrame {
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
     buttonPanel.add(runButton);
+    buttonPanel.add(runButtonPy);
+    buttonPanel.add(runButtonCSharp);
 
     setLayout(new BorderLayout());
     add(inputScroll, BorderLayout.CENTER);
@@ -78,6 +86,59 @@ public class LanguageIDE extends JFrame {
       }
     });
   }
+
+  private void convertirAPython() {
+  String codigo = inputArea.getText();
+  try {
+    CharStream input = CharStreams.fromString(codigo);
+    LanguageLexer lexer = new LanguageLexer(input);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    LanguageParser parser = new LanguageParser(tokens);
+
+    parser.removeErrorListeners();
+    parser.addErrorListener(new BaseErrorListener() {
+      @Override
+      public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+          int line, int charPositionInLine, String msg, RecognitionException e) {
+        throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+      }
+    });
+
+    LanguageParser.ProgramContext tree = parser.program();
+    LanguageToPythonVisitor pyVisitor = new LanguageToPythonVisitor();
+    String pythonCode = pyVisitor.visit(tree);
+
+    outputArea.setText(pythonCode);
+  } catch (Exception e) {
+    outputArea.setText("Error:\n" + e.getMessage());
+  }
+}
+private void convertirACSharp() {
+  String codigo = inputArea.getText();
+  try {
+    CharStream input = CharStreams.fromString(codigo);
+    LanguageLexer lexer = new LanguageLexer(input);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    LanguageParser parser = new LanguageParser(tokens);
+
+    parser.removeErrorListeners();
+    parser.addErrorListener(new BaseErrorListener() {
+      @Override
+      public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+          int line, int charPositionInLine, String msg, RecognitionException e) {
+        throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+      }
+    });
+
+    LanguageParser.ProgramContext tree = parser.program();
+    LanguageToCSharpVisitor csVisitor = new LanguageToCSharpVisitor();
+    String csharpCode = csVisitor.visit(tree);
+
+    outputArea.setText(csharpCode);
+  } catch (Exception e) {
+    outputArea.setText("Error:\n" + e.getMessage());
+  }
+}
 
   private void ejecutarCodigo() {
     String codigo = inputArea.getText();
