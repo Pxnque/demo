@@ -64,7 +64,7 @@ public class LanguageIDE extends JFrame {
               .getTransferData(DataFlavor.javaFileListFlavor);
 
           for (File file : droppedFiles) {
-            if (file.getName().endsWith(".lang")) {
+            if (file.getName().endsWith(".kys")) {
               String content = new String(java.nio.file.Files.readAllBytes(file.toPath()));
               inputArea.setText(content);
               outputArea.setText("Archivo cargado: " + file.getName());
@@ -101,7 +101,7 @@ public class LanguageIDE extends JFrame {
       LanguageCustomVisitor visitor = new LanguageCustomVisitor();
       Object result = visitor.visit(tree);
 
-      outputArea.setText("Ejecución correcta.\nResultado:\n" + result);
+      outputArea.setText("Ejecución correcta.:\n");
     } catch (Exception e) {
       outputArea.setText("Error:\n" + e.getMessage());
     }
