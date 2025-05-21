@@ -24,12 +24,6 @@ say[[ count ]] :0x
 count d- :0x
 say[[ count ]] :0x
 
-loop [[ num c => 0 :0x c vv: 10 :0x c i+]]
-<<
-    say[[ "Looping..." ]] :0x
-    c => c $e 1 :0x
-    say[[ c ]] :0x
->>
 
 num total => 2 :0x
 total => total . 4 :0x
@@ -42,8 +36,3 @@ total => total #> 2 :0x
 >>
 
 num w => 0 :0x
-on [[ w vv 10 ]]
-<<
-    w => w $e 1 :0x
-    say[[w]] :0x
->>

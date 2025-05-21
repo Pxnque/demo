@@ -14,6 +14,7 @@ public class LanguageIDE extends JFrame {
   private JTextArea inputArea;
   private JTextArea outputArea;
   private JButton runButton,runButtonPy, runButtonCSharp;
+  private JButton exportPyButton, exportCSharpButton;
 
   public LanguageIDE() {
     setTitle("Lenguaje Custom IDE");
@@ -40,6 +41,11 @@ public class LanguageIDE extends JFrame {
     // runButton.addActionListener(e -> ejecutarConvertirPy());
     runButtonCSharp = new JButton("Convertir a .c#");
     runButtonCSharp.addActionListener(e -> convertirACSharp());
+    exportPyButton = new JButton("Exportar .py");
+exportPyButton.addActionListener(e -> exportarPython());
+exportCSharpButton = new JButton("Exportar .c#");
+exportCSharpButton.addActionListener(e -> exportarCSharp());
+
 
     JScrollPane inputScroll = new JScrollPane(inputArea);
     inputScroll.setBorder(BorderFactory.createTitledBorder("Código fuente"));
@@ -52,6 +58,8 @@ public class LanguageIDE extends JFrame {
     buttonPanel.add(runButton);
     buttonPanel.add(runButtonPy);
     buttonPanel.add(runButtonCSharp);
+    buttonPanel.add(exportPyButton);
+    buttonPanel.add(exportCSharpButton);
 
     setLayout(new BorderLayout());
     add(inputScroll, BorderLayout.CENTER);
@@ -135,6 +143,78 @@ private void convertirACSharp() {
     String csharpCode = csVisitor.visit(tree);
 
     outputArea.setText(csharpCode);
+  } catch (Exception e) {
+    outputArea.setText("Error:\n" + e.getMessage());
+  }
+}
+private void exportarPython() {
+  String codigo = inputArea.getText();
+  try {
+    CharStream input = CharStreams.fromString(codigo);
+    LanguageLexer lexer = new LanguageLexer(input);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    LanguageParser parser = new LanguageParser(tokens);
+
+    parser.removeErrorListeners();
+    parser.addErrorListener(new BaseErrorListener() {
+      @Override
+      public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+          int line, int charPositionInLine, String msg, RecognitionException e) {
+        throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+      }
+    });
+
+    LanguageParser.ProgramContext tree = parser.program();
+    LanguageToPythonVisitor pyVisitor = new LanguageToPythonVisitor();
+    String pythonCode = pyVisitor.visit(tree);
+
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Guardar como");
+    fileChooser.setSelectedFile(new File("codigo.py"));
+    int userSelection = fileChooser.showSaveDialog(this);
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+      File fileToSave = fileChooser.getSelectedFile();
+      try (FileWriter fw = new FileWriter(fileToSave)) {
+        fw.write(pythonCode);
+        outputArea.setText("Archivo .py exportado: " + fileToSave.getAbsolutePath());
+      }
+    }
+  } catch (Exception e) {
+    outputArea.setText("Error:\n" + e.getMessage());
+  }
+}
+private void exportarCSharp() {
+  String codigo = inputArea.getText();
+  try {
+    CharStream input = CharStreams.fromString(codigo);
+    LanguageLexer lexer = new LanguageLexer(input);
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    LanguageParser parser = new LanguageParser(tokens);
+
+    parser.removeErrorListeners();
+    parser.addErrorListener(new BaseErrorListener() {
+      @Override
+      public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+          int line, int charPositionInLine, String msg, RecognitionException e) {
+        throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+      }
+    });
+
+    LanguageParser.ProgramContext tree = parser.program();
+    LanguageToCSharpVisitor csVisitor = new LanguageToCSharpVisitor();
+    String csharpCode = csVisitor.visit(tree);
+
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Guardar como");
+    fileChooser.setSelectedFile(new File("codigo.cs"));
+    int userSelection = fileChooser.showSaveDialog(this);
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+      File fileToSave = fileChooser.getSelectedFile();
+      try (FileWriter fw = new FileWriter(fileToSave)) {
+        fw.write(csharpCode);
+        outputArea.setText("Archivo .c# exportado: " + fileToSave.getAbsolutePath());
+      }
+    }
   } catch (Exception e) {
     outputArea.setText("Error:\n" + e.getMessage());
   }
