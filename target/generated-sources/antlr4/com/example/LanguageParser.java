@@ -957,6 +957,10 @@ public class LanguageParser extends Parser {
 			if ( visitor instanceof LanguageVisitor ) return ((LanguageVisitor<? extends T>)visitor).visitWhiledecla(this);
 			else return visitor.visitChildren(this);
 		}
+        public Object incdec() {
+            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException("Unimplemented method 'incdec'");
+        }
 	}
 
 	public final WhiledeclaContext whiledecla() throws RecognitionException {

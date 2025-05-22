@@ -54,32 +54,50 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
         return "";
     }
 
-    @Override
-    public String visitWhiledecla(LanguageParser.WhiledeclaContext ctx) {
-        appendLine("while " + visit(ctx.condicional()) + ":");
-        indentLevel++;
-        for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
-            visit(instr);
+@Override
+public String visitWhiledecla(LanguageParser.WhiledeclaContext ctx) {
+    appendLine("while " + visit(ctx.condicional()) + ":");
+    indentLevel++;
+    
+    // Visit all instructions in the while body
+    for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
+        // Check if this instruction is an increment/decrement
+        if (instr.getChild(0) instanceof LanguageParser.IncdecContext) {
+            LanguageParser.IncdecContext incCtx = 
+                (LanguageParser.IncdecContext) instr.getChild(0);
+            String id = incCtx.ID().getText();
+            if (incCtx.getText().contains("$e")) {
+                appendLine(id + " += 1");
+            } else if (incCtx.getText().contains("~>")) {
+                appendLine(id + " -= 1");
+            }
+        } else {
+            String result = visit(instr);
+            if (result != null && !result.isEmpty()) {
+                appendLine(result);
+            }
         }
-        indentLevel--;
-        return "";
     }
+    
+    indentLevel--;
+    return "";
+}
 
-    @Override
-    public String visitFordecla(LanguageParser.FordeclaContext ctx) {
-        String init = visit(ctx.declaracion());
-        String cond = visit(ctx.condicional());
-        String inc = ctx.incdec() != null ? visit(ctx.incdec()) : "";
+    // @Override
+    // public String visitFordecla(LanguageParser.FordeclaContext ctx) {
+    //     String init = visit(ctx.declaracion());
+    //     String cond = visit(ctx.condicional());
+    //     String inc = ctx.incdec() != null ? visit(ctx.incdec()) : "";
         
-        // Convertir a formato de for de Python
-        appendLine("for " + ctx.declaracion().ID().getText() + " in range(" + cond + "):");
-        indentLevel++;
-        for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
-            visit(instr);
-        }
-        indentLevel--;
-        return "";
-    }
+    //     // Convertir a formato de for de Python
+    //     appendLine("for " + ctx.declaracion().ID().getText() + " in range(" + cond + "):");
+    //     indentLevel++;
+    //     for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
+    //         visit(instr);
+    //     }
+    //     indentLevel--;
+    //     return "";
+    // }
 
     @Override
     public String visitCondicional(LanguageParser.CondicionalContext ctx) {
@@ -140,13 +158,45 @@ public class LanguageToPythonVisitor extends LanguageBaseVisitor<String> {
     }
 
     @Override
-    public String visitIncdec(LanguageParser.IncdecContext ctx) {
-        String id = ctx.ID().getText();
-        if (ctx.INC() != null) {
-            appendLine(id + " += 1");
-        } else if (ctx.DEC() != null) {
-            appendLine(id + " -= 1");
-        }
-        return "";
+public String visitFordecla(LanguageParser.FordeclaContext ctx) {
+    // Get the variable name and initial value
+    String varName = ctx.declaracion().ID().getText();
+    String startValue = visit(ctx.declaracion().expr());
+    String endValue = visit(ctx.condicional().expr(1));
+    
+    // Create Python range-based for loop
+     appendLine("for " + varName + " in range(" + startValue + ", " + endValue + "):");
+    indentLevel++;
+    
+    // Visit loop body
+    for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
+        visit(instr);
     }
+    
+    // Add increment/decrement at the end of loop body
+    if (ctx.incdec() != null) {
+        if (ctx.incdec().INC() != null) {
+            appendLine(varName + " += 1");
+        } else if (ctx.incdec().DEC() != null) {
+            appendLine(varName + " -= 1");
+        }
+    }
+    
+    indentLevel--;
+    return "";
+}
+
+@Override
+public String visitIncdec(LanguageParser.IncdecContext ctx) {
+    String id = ctx.ID().getText();
+   
+    if (ctx.getText().contains("$e")) {
+        appendLine(id + " += 1");
+        return id + " += 1";
+    } else if (ctx.getText().contains("~>")) {  // assuming $d is for decrement
+        appendLine(id + " -= 1");
+        return id + " -= 1";
+    }
+    return "";
+}
 }

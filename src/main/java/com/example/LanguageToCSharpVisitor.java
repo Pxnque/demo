@@ -85,36 +85,54 @@ public class LanguageToCSharpVisitor extends LanguageBaseVisitor<String> {
         return "";
     }
 
-    @Override
-    public String visitWhiledecla(LanguageParser.WhiledeclaContext ctx) {
-        appendLine("while (" + visit(ctx.condicional()) + ")");
-        appendLine("{");
-        indentLevel++;
-        for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
-            visit(instr);
+@Override
+public String visitWhiledecla(LanguageParser.WhiledeclaContext ctx) {
+    appendLine("while (" + visit(ctx.condicional()) + ")");
+    appendLine("{");
+    indentLevel++;
+    
+    // Visit all instructions in the while body
+    for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
+        // Check if this instruction is an increment/decrement
+        if (instr.getChild(0) instanceof LanguageParser.IncdecContext) {
+            LanguageParser.IncdecContext incCtx = 
+                (LanguageParser.IncdecContext) instr.getChild(0);
+            String id = incCtx.ID().getText();
+            if (incCtx.getText().contains("$e")) {
+                appendLine(id + "++;");
+            } else if (incCtx.getText().contains("~>")) {
+                appendLine(id + "--;");
+            }
+        } else {
+            String result = visit(instr);
+            if (result != null && !result.isEmpty()) {
+                appendLine(result);
+            }
         }
-        indentLevel--;
-        appendLine("}");
-        return "";
     }
+    
+    indentLevel--;
+    appendLine("}");
+    return "";
+}
 
-    @Override
-    public String visitFordecla(LanguageParser.FordeclaContext ctx) {
-        String init = visit(ctx.declaracion());
-        String cond = visit(ctx.condicional());
-        String inc = ctx.incdec() != null ? visit(ctx.incdec()) : "";
+    // @Override
+    // public String visitFordecla(LanguageParser.FordeclaContext ctx) {
+    //     String init = visit(ctx.declaracion());
+    //     String cond = visit(ctx.condicional());
+    //     String inc = ctx.incdec() != null ? visit(ctx.incdec()) : "";
         
-        appendLine("for (" + init.trim() + " " + cond + "; " + 
-                  ctx.declaracion().ID().getText() + "++)");
-        appendLine("{");
-        indentLevel++;
-        for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
-            visit(instr);
-        }
-        indentLevel--;
-        appendLine("}");
-        return "";
-    }
+    //     appendLine("for (" + init.trim() + " " + cond + "; " + 
+    //               ctx.declaracion().ID().getText() + "++)");
+    //     appendLine("{");
+    //     indentLevel++;
+    //     for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
+    //         visit(instr);
+    //     }
+    //     indentLevel--;
+    //     appendLine("}");
+    //     return "";
+    // }
 
     @Override
     public String visitCondicional(LanguageParser.CondicionalContext ctx) {
@@ -175,13 +193,42 @@ public class LanguageToCSharpVisitor extends LanguageBaseVisitor<String> {
     }
 
     @Override
-    public String visitIncdec(LanguageParser.IncdecContext ctx) {
-        String id = ctx.ID().getText();
-        if (ctx.INC() != null) {
-            appendLine(id + "++;");
-        } else if (ctx.DEC() != null) {
-            appendLine(id + "--;");
-        }
-        return "";
+public String visitFordecla(LanguageParser.FordeclaContext ctx) {
+    // Get initialization
+    String init = visit(ctx.declaracion()).trim();
+    String varName = ctx.declaracion().ID().getText();
+    String condition = visit(ctx.condicional());
+    
+    // Create C# for loop with proper increment/decrement
+    String increment = varName + "++";
+    if (ctx.incdec() != null) {
+        increment = varName + (ctx.incdec().INC() != null ? "++" : "--");
     }
+    
+    appendLine("for (" + init + "; " + condition + "; " + increment + ")");
+    appendLine("{");
+    indentLevel++;
+    
+    for (LanguageParser.InstruccionContext instr : ctx.instruccion()) {
+        visit(instr);
+    }
+    
+    indentLevel--;
+    appendLine("}");
+    return "";
+}
+
+@Override
+public String visitIncdec(LanguageParser.IncdecContext ctx) {
+    String id = ctx.ID().getText();
+    // Handle your custom increment/decrement syntax
+    if (ctx.getText().contains("$e")) {
+        appendLine(id + "++;");
+        return id + "++";
+    } else if (ctx.getText().contains("~>")) {
+        appendLine(id + "--;");
+        return id + "--";
+    }
+    return "";
+}
 }
