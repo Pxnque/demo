@@ -5,16 +5,41 @@ import java.util.HashMap;
 import com.example.LanguageParser.*;
 
 public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
-
+    private final StringBuilder output = new StringBuilder();
     public final HashMap<String, Object> tablaSimbolos = new HashMap<>();
 
+   
+
     @Override
-    public Object visitProgram(ProgramContext ctx) {
-        Object result = null;
-        for (InstruccionContext instr : ctx.instruccion()) {
-            result = visit(instr);
-        }
-        return result;
+public Object visitProgram(ProgramContext ctx) {
+    output.setLength(0); // Clear any previous output
+    Object lastResult = null;
+    for (InstruccionContext instr : ctx.instruccion()) {
+        lastResult = visit(instr);
+    }
+    return lastResult;
+}
+
+@Override
+public Object visitPrint(PrintContext ctx) {
+    Object value = visit(ctx.expr());
+    if (value != null) {
+        String outputStr = value.toString();
+        output.append(outputStr).append("\n");
+        System.out.println("Debug - Print: " + outputStr); // Debug line
+    }
+    return null;
+}
+
+    public String getOutput() {
+    String result = output.toString();
+    System.out.println("Debug - Final output: " + result); // Debug line
+    return result;
+}
+
+    // Clear output buffer if needed
+    public void clearOutput() {
+        output.setLength(0);
     }
 
     @Override
@@ -72,6 +97,9 @@ public class LanguageCustomVisitor extends LanguageBaseVisitor<Object> {
 
     @Override
     public Object visitInstruccion(InstruccionContext ctx) {
+        if (ctx.print() != null) {
+        return visit(ctx.print());
+    }
         if (ctx.OP_ASIGN() != null) {
             String identificador = ctx.ID().getText();
             Object valor = ctx.expr() != null ? visit(ctx.expr()) : visit(ctx.condicional());

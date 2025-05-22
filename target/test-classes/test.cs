@@ -14,13 +14,10 @@ class Program {
         }
         Console.WriteLine("Ratio updated");
         Console.WriteLine(message);
-        count++;
         Console.WriteLine(count);
-        count--;
         Console.WriteLine(count);
         int c = 0;
-        c++;
-        for ( c <= 10; c++)
+        for (; c <= 10; c++)
         {
             Console.WriteLine("Looping...");
             Console.WriteLine(c);

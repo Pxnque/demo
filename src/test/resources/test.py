@@ -8,15 +8,12 @@ if flag == True:
     print("Flag is true")
 print("Ratio updated")
 print(message)
-count += 1
 print(count)
-count -= 1
 print(count)
-c = 0
-c += 1
-for c in range(c <= 10):
+for c in range(0, 10):
     print("Looping...")
     print(c)
+    c += 1
 total = 2
 print(total)
 if total < 0:

@@ -42,9 +42,9 @@ public class LanguageIDE extends JFrame {
     runButtonCSharp = new JButton("Convertir a .c#");
     runButtonCSharp.addActionListener(e -> convertirACSharp());
     exportPyButton = new JButton("Exportar .py");
-exportPyButton.addActionListener(e -> exportarPython());
-exportCSharpButton = new JButton("Exportar .c#");
-exportCSharpButton.addActionListener(e -> exportarCSharp());
+    exportPyButton.addActionListener(e -> exportarPython());
+    exportCSharpButton = new JButton("Exportar .c#");
+    exportCSharpButton.addActionListener(e -> exportarCSharp());
     exportMyLanguageButton = new JButton("Exportar .kys");
     exportMyLanguageButton.addActionListener(e -> exportarMyLanguage());
 
@@ -223,33 +223,40 @@ private void exportarCSharp() {
   }
 }
 
-  private void ejecutarCodigo() {
+private void ejecutarCodigo() {
     String codigo = inputArea.getText();
     try {
-      CharStream input = CharStreams.fromString(codigo);
-      LanguageLexer lexer = new LanguageLexer(input);
-      CommonTokenStream tokens = new CommonTokenStream(lexer);
-      LanguageParser parser = new LanguageParser(tokens);
+        CharStream input = CharStreams.fromString(codigo);
+        LanguageLexer lexer = new LanguageLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        LanguageParser parser = new LanguageParser(tokens);
 
-      // Captura errores de sintaxis
-      parser.removeErrorListeners();
-      parser.addErrorListener(new BaseErrorListener() {
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
-            int line, int charPositionInLine, String msg, RecognitionException e) {
-          throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+        parser.removeErrorListeners();
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+                    int line, int charPositionInLine, String msg, RecognitionException e) {
+                throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+            }
+        });
+
+        LanguageParser.ProgramContext tree = parser.program();
+        LanguageCustomVisitor visitor = new LanguageCustomVisitor();
+        
+        visitor.visit(tree);
+        String output = visitor.getOutput();
+        
+        if (output != null && !output.trim().isEmpty()) {
+            outputArea.setText(output);
+        } else {
+            outputArea.setText("No hay salida que mostrar");
         }
-      });
-
-      LanguageParser.ProgramContext tree = parser.program();
-      LanguageCustomVisitor visitor = new LanguageCustomVisitor();
-      Object result = visitor.visit(tree);
-
-      outputArea.setText("Ejecución correcta.:\n");
+        
     } catch (Exception e) {
-      outputArea.setText("Error:\n" + e.getMessage());
+        e.printStackTrace();
+        outputArea.setText("Error:\n" + e.getMessage());
     }
-  }
+}
   private void exportarMyLanguage() {
     String codigo = inputArea.getText();
     try {
