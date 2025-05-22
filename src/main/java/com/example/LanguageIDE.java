@@ -14,7 +14,7 @@ public class LanguageIDE extends JFrame {
   private JTextArea inputArea;
   private JTextArea outputArea;
   private JButton runButton,runButtonPy, runButtonCSharp;
-  private JButton exportPyButton, exportCSharpButton;
+  private JButton exportPyButton, exportCSharpButton,exportMyLanguageButton;
 
   public LanguageIDE() {
     setTitle("Lenguaje Custom IDE");
@@ -45,6 +45,8 @@ public class LanguageIDE extends JFrame {
 exportPyButton.addActionListener(e -> exportarPython());
 exportCSharpButton = new JButton("Exportar .c#");
 exportCSharpButton.addActionListener(e -> exportarCSharp());
+    exportMyLanguageButton = new JButton("Exportar .kys");
+    exportMyLanguageButton.addActionListener(e -> exportarMyLanguage());
 
 
     JScrollPane inputScroll = new JScrollPane(inputArea);
@@ -60,6 +62,7 @@ exportCSharpButton.addActionListener(e -> exportarCSharp());
     buttonPanel.add(runButtonCSharp);
     buttonPanel.add(exportPyButton);
     buttonPanel.add(exportCSharpButton);
+    buttonPanel.add(exportMyLanguageButton);
 
     setLayout(new BorderLayout());
     add(inputScroll, BorderLayout.CENTER);
@@ -247,6 +250,59 @@ private void exportarCSharp() {
       outputArea.setText("Error:\n" + e.getMessage());
     }
   }
+  private void exportarMyLanguage() {
+    String codigo = inputArea.getText();
+    try {
+        // Validate the syntax before saving
+        CharStream input = CharStreams.fromString(codigo);
+        LanguageLexer lexer = new LanguageLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        LanguageParser parser = new LanguageParser(tokens);
+
+        parser.removeErrorListeners();
+        parser.addErrorListener(new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol,
+                    int line, int charPositionInLine, String msg, RecognitionException e) {
+                throw new RuntimeException("Error de sintaxis en línea " + line + ":" + charPositionInLine + " - " + msg);
+            }
+        });
+
+        // Verify syntax is correct by parsing
+        parser.program();
+
+        // If no syntax errors, proceed to save
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Guardar como");
+        fileChooser.setSelectedFile(new File("codigo.kys"));
+        
+        // Add file filter for .kys files
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
+            public boolean accept(File f) {
+                return f.getName().toLowerCase().endsWith(".kys") || f.isDirectory();
+            }
+            public String getDescription() {
+                return "Archivos de Lenguaje Custom (.kys)";
+            }
+        });
+
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            // Add .kys extension if not present
+            if (!fileToSave.getName().toLowerCase().endsWith(".kys")) {
+                fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".kys");
+            }
+            
+            try (FileWriter fw = new FileWriter(fileToSave)) {
+                fw.write(codigo);
+                outputArea.setText("Archivo .kys exportado: " + fileToSave.getAbsolutePath());
+            }
+        }
+    } catch (Exception e) {
+        outputArea.setText("Error:\n" + e.getMessage());
+    }
+}
 
   public static void main(String[] args) {
     SwingUtilities.invokeLater(LanguageIDE::new);
